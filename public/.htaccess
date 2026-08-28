@@ -1,0 +1,24 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+  Header set X-Frame-Options "DENY"
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Cross-Origin-Opener-Policy "same-origin"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com; connect-src 'self' https://formsubmit.co https://*.supabase.co https://YOUR-API-HOST.example.com;"
+  # NOTE: Replace https://YOUR-API-HOST.example.com above with the external API host used for
+  # the Groq/Resend proxy (set as VITE_API_BASE when building). Remove it if still using same-origin /api.
+  
+  # Caching for static assets and public assets
+  <filesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|webp|js|css|swf|woff2?)$">
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </filesMatch>
+</IfModule>

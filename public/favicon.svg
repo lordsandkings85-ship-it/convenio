@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Speed lines on the left -->
+  <path d="M10 38 H30" stroke="#e01a22" stroke-width="6" stroke-linecap="round" />
+  <path d="M5 50 H32" stroke="#e01a22" stroke-width="6" stroke-linecap="round" />
+  <path d="M15 62 H28" stroke="#e01a22" stroke-width="6" stroke-linecap="round" />
+  
+  <!-- Cart handle and structure -->
+  <path d="M30 24 L38 24 L48 48" stroke="#e01a22" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Red basket solid body -->
+  <path d="M42 32 H92 L82 58 H50 Z" fill="#e01a22" />
+  
+  <!-- White 'C' inside the basket -->
+  <path d="M72 40 C70 38 67 37 64 37 C58.5 37 54 41.5 54 47 C54 52.5 58.5 57 64 57 C67 57 70 56 72 54" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" fill="none" />
+  
+  <!-- Support bar below the basket -->
+  <path d="M48 64 H76" stroke="#e01a22" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Wheels -->
+  <circle cx="54" cy="74" r="7" fill="#e01a22" />
+  <circle cx="70" cy="74" r="7" fill="#e01a22" />
+</svg>
