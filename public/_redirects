@@ -1,4 +1,1 @@
-/api/groq/*    /.netlify/functions/groq    200
-/api/resend/*  /.netlify/functions/resend  200
-/*             /index.html                 200
-
+/*    /index.html   200

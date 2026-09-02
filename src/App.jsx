@@ -1,53 +1,46 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import About from './pages/About';
-import Franchise from './pages/Franchise';
-import Stores from './pages/Stores';
-import Contact from './pages/Contact';
-import Careers from './pages/Careers';
 import ScrollToTop from './components/ScrollToTop';
 import ChatbotWidget from './components/ChatbotWidget';
-import AdminView from './components/AdminView';
-import { DialogProvider } from './components/Dialog';
-import { TemplateProvider } from './context/TemplateContext';
 
-function PublicLayout({ children }) {
-  return (
-    <div className="app site-content">
-      <Header />
-      <main className="main-content">{children}</main>
-      <Footer />
-      {/* AI-powered franchise enquiry chatbot, available site-wide */}
-      <ChatbotWidget />
-    </div>
-  );
-}
+// Route code-splitting with dynamic imports
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const Franchise = lazy(() => import('./pages/Franchise'));
+const Stores = lazy(() => import('./pages/Stores'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Careers = lazy(() => import('./pages/Careers'));
 
 function App() {
   return (
     <HelmetProvider>
-      <DialogProvider>
-        <TemplateProvider>
-          <Router>
-            <ScrollToTop />
-            <Routes>
-              {/* Admin / Franchise Leads Dashboard (own layout, no public header/footer) */}
-              <Route path="/admin" element={<AdminView />} />
-
-              {/* Public marketing site */}
-              <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-              <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-              <Route path="/franchise" element={<PublicLayout><Franchise /></PublicLayout>} />
-              <Route path="/stores" element={<PublicLayout><Stores /></PublicLayout>} />
-              <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-              <Route path="/careers" element={<PublicLayout><Careers /></PublicLayout>} />
-            </Routes>
-          </Router>
-        </TemplateProvider>
-      </DialogProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="app">
+          <Header />
+          <main className="main-content">
+            <Suspense fallback={
+              <div className="page-loader">
+                <div className="loading-spinner"></div>
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/franchise" element={<Franchise />} />
+                <Route path="/stores" element={<Stores />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/careers" element={<Careers />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <ChatbotWidget />
+          <Footer />
+        </div>
+      </Router>
     </HelmetProvider>
   );
 }

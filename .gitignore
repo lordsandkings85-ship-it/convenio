@@ -12,10 +12,13 @@ dist
 dist-ssr
 *.local
 
-# Environment variables (contains Supabase/Groq/Resend secrets)
+# Environment files
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
+
+# Lighthouse reports
+*report*.json
 
 # Editor directories and files
 .vscode/*

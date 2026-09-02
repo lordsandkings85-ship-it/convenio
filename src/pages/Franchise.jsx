@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { Check, ClipboardList, PhoneCall, MapPin, Rocket, LayoutDashboard, Truck, Megaphone, Users, ChevronDown, ChevronUp, CheckCircle, Send } from 'lucide-react';
 import SEO from '../components/SEO';
 import AppShowcase from '../components/AppShowcase';
-import { createEnquiry } from '../lib/api';
 import './Franchise.css';
-
-// Base URL for the Resend proxy. Same intent as VITE_API_BASE in ChatbotWidget:
-// default same-origin /api, or an external API host for static deployments.
-const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '');
 
 const faqs = [
   {
@@ -32,6 +27,7 @@ const Franchise = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const franchiseSchema = {
     "@context": "https://schema.org",
@@ -50,67 +46,36 @@ const Franchise = () => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    const fullName = (data["Full Name"] || "").trim();
-    const mobile = (data["Mobile Number"] || "").trim();
-    const email = (data["Email Address"] || "").trim();
-    const city = (data["City or Location"] || "").trim();
-    const propertyStatus = data["Property Status"] || "";
-    const carpetArea = data["Carpet Area (sq.ft)"] || "";
-    const message = (data["Message"] || "").trim();
+    // Formsubmit visual customization
+    data["_template"] = "table";
+    data["_subject"] = `New Franchise Application from ${data["Full Name"] || "Applicant"}`;
 
-    // 1. Save the lead to Supabase so it shows up in the Franchise Admin Dashboard
-    //    (property_status/carpet_area require the supabase_franchise_fields.sql migration)
-    try {
-      await createEnquiry({
-        name: fullName,
-        phone: mobile,
-        email,
-        location: city,
-        property_status: propertyStatus,
-        carpet_area: carpetArea,
-        notes: message,
-        status: 'NEW',
-        source: 'FORM'
+    fetch("https://formsubmit.co/ajax/conveniomart@lordsandkingsagro.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(resData => {
+        setIsSubmitting(false);
+        setIsSuccess(true);
+      })
+      .catch(error => {
+        console.error("Form submission error:", error);
+        setIsSubmitting(false);
+        // Fallback to success so user flow is not blocked if service is momentarily offline
+        setIsSuccess(true);
       });
-    } catch (dbErr) {
-      console.error('Database connection error:', dbErr);
-    }
-
-    // 2. Send an instant email notification via the Resend API
-    try {
-      await fetch(`${API_BASE}/resend/emails`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: 'Convenio Mart Leads <info@atyourdoor.life>',
-          to: ['conveniomart@lordsandkingsagro.com'],
-          subject: `New Franchise Lead: ${fullName} (${city})`,
-          html: `
-            <h3>New Franchise Enquiry</h3>
-            <p><strong>Name:</strong> ${fullName}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Mobile:</strong> ${mobile}</p>
-            <p><strong>City:</strong> ${city}</p>
-            <p><strong>Property Status:</strong> ${propertyStatus || 'N/A'}</p>
-            <p><strong>Carpet Area:</strong> ${carpetArea ? carpetArea + ' sq.ft' : 'N/A'}</p>
-            <p><strong>Message:</strong> ${message || 'N/A'}</p>
-            <p><strong>Source:</strong> Franchise Enquiry Form</p>
-          `
-        })
-      });
-    } catch (emailErr) {
-      console.error('Resend email error:', emailErr);
-    }
-
-    setIsSubmitting(false);
-    setIsSuccess(true);
   };
 
   return (
@@ -128,8 +93,8 @@ const Franchise = () => {
         
         <div className="container franchise-container">
           <div className="franchise-left">
-            <h1>Take the First Step <br/> Towards Ownership</h1>
-            <p className="franchise-subtitle">Fill the form and our team will <br/> get in touch with you.</p>
+            <h1>Take the First Step <br/> Towards <span className="highlight-red">Ownership</span></h1>
+            <p className="franchise-subtitle">Fill the form and our team will get in touch with you.</p>
             
             <ul className="franchise-benefits">
               <li><Check size={20} color="var(--primary-color)" strokeWidth={3} /> Low Investment</li>
@@ -152,27 +117,26 @@ const Franchise = () => {
                 </div>
               ) : (
                 <>
-                  <div className="form-card-header" style={{ marginBottom: '2rem', textAlign: 'center'}}>
-
-                    <h3 style={{ fontSize: '1.5rem', color: 'var(--dark-navy)', marginBottom: '0.5rem', }}>Partner Application</h3>
-                    <p style={{ color: 'var(--text-light)', fontSize: '0.9rem' }}>Join the Convenio Mart family. Please fill out the form below to get started.</p>
+                  <div className="form-card-header">
+                    <h3>Franchise Enquiry</h3>
+                    <p>Please provide your contact details below and our franchise experts will reach out to you shortly.</p>
                   </div>
                   <form className="enquiry-form" onSubmit={handleSubmit}>
                     <div className="form-row">
                       <div className="form-group">
                         <label htmlFor="fullName">Full Name *</label>
-                        <input type="text" id="fullName" name="Full Name" placeholder="John Doe" autoComplete="name" required />
+                        <input type="text" id="fullName" name="Full Name" placeholder="Ramesh" autoComplete="name" required />
                       </div>
                       <div className="form-group">
                         <label htmlFor="mobileNumber">Mobile Number *</label>
-                        <input type="tel" id="mobileNumber" name="Mobile Number" placeholder="+91 98765 43210" autoComplete="tel" required />
+                        <input type="tel" id="mobileNumber" name="Mobile Number" placeholder="9876543210" autoComplete="tel" required />
                       </div>
                     </div>
                     
                     <div className="form-row">
                       <div className="form-group">
                         <label htmlFor="emailAddress">Email Address *</label>
-                        <input type="email" id="emailAddress" name="Email Address" placeholder="john@example.com" autoComplete="email" required />
+                        <input type="email" id="emailAddress" name="Email Address" placeholder="ramesh@example.com" autoComplete="email" required />
                       </div>
                       <div className="form-group">
                         <label htmlFor="cityOrLocation">City / Location *</label>
@@ -180,27 +144,24 @@ const Franchise = () => {
                       </div>
                     </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="propertyStatus">Property Status *</label>
-                        <select id="propertyStatus" name="Property Status" defaultValue="" required>
-                          <option value="" disabled>Select Type</option>
-                          <option value="owned">Owned</option>
-                          <option value="leased">Leased</option>
-                          <option value="rented">Rented</option>
-                          <option value="looking">Looking for space</option>
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="carpetArea">Carpet Area (sq.ft) *</label>
-                        <input type="number" id="carpetArea" name="Carpet Area (sq.ft)" placeholder="e.g. 500" required />
-                      </div>
+                    <div className="form-checkbox-group">
+                      <label htmlFor="showMessageCheckbox" className="checkbox-label">
+                        <input 
+                          type="checkbox" 
+                          id="showMessageCheckbox" 
+                          checked={showMessage} 
+                          onChange={(e) => setShowMessage(e.target.checked)} 
+                        />
+                        <span>Add a message (Optional)</span>
+                      </label>
                     </div>
                     
-                    <div className="form-group full-width">
-                      <label htmlFor="message">Message (Optional)</label>
-                      <textarea id="message" name="Message" placeholder="Tell us why you want to partner with us..." rows="3" style={{ resize: 'vertical' }}></textarea>
-                    </div>
+                    {showMessage && (
+                      <div className="form-group full-width message-field-anim">
+                        <label htmlFor="message">Message (Optional)</label>
+                        <textarea id="message" name="Message" placeholder="Tell us why you want to partner with us..." rows="3" style={{ resize: 'vertical' }}></textarea>
+                      </div>
+                    )}
                     
                     <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem' }} disabled={isSubmitting}>
                       {isSubmitting ? 'Submitting...' : (
