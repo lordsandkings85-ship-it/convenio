@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLogin from './AdminLogin';
 import AdminDashboard from './AdminDashboard';
 import '../admin.css';
+import '../admin-overrides.css';
 
 export default function AdminView() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

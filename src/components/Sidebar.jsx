@@ -63,7 +63,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       <div style={{ padding: '12px' }}>
         <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '14px', padding: '16px', textAlign: 'center' }}>
           <div style={{ width: '52px', height: '52px', borderRadius: '12px', margin: '0 auto 10px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#fff' }}>
-            <img src="/Mart%20logo.jpg" alt="Convenio Mart" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="Convenio Mart" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div style={{ fontWeight: '800', fontSize: '13px', color: '#0b1120', letterSpacing: '-0.01em' }}>Convenio Mart</div>
           <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '600', marginTop: '3px', lineHeight: 1.4 }}>Mini-Supermarket Franchise</div>

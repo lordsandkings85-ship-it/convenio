@@ -34,23 +34,33 @@ if (!$resendApiKey && file_exists(__DIR__ . '/../../.env')) {
     }
 }
 
+if (!$resendApiKey) {
+    echo json_encode(['error' => 'Resend API key not configured on server']);
+    exit();
+}
+
 $to = $data['to'] ?? 'conveniomart@lordsandkingsagro.com';
 $subject = $data['subject'] ?? 'New AI Chatbot Lead';
 $lead = $data['leadData'] ?? [];
 $transcript = $data['transcript'] ?? '';
 
-$html = "<h3>New AI Chatbot Lead</h3>"
-      . "<p><strong>Name:</strong> " . htmlspecialchars($lead['name'] ?? 'N/A') . "</p>"
-      . "<p><strong>Phone:</strong> " . htmlspecialchars($lead['phone'] ?? 'N/A') . "</p>"
-      . "<p><strong>Area:</strong> " . htmlspecialchars($lead['area'] ?? 'N/A') . "</p>"
-      . "<p><strong>Budget:</strong> " . htmlspecialchars($lead['budget'] ?? 'N/A') . "</p>"
-      . "<hr/>"
-      . "<h4>Chat Transcript:</h4>"
-      . "<pre style='white-space: pre-wrap; font-family: sans-serif;'>" . htmlspecialchars($transcript) . "</pre>";
+if (!empty($data['html'])) {
+    $html = $data['html'];
+} else {
+    $html = "<h3>New AI Chatbot Lead</h3>"
+          . "<p><strong>Name:</strong> " . htmlspecialchars($lead['name'] ?? 'N/A') . "</p>"
+          . "<p><strong>Phone:</strong> " . htmlspecialchars($lead['phone'] ?? 'N/A') . "</p>"
+          . "<p><strong>Area / Location:</strong> " . htmlspecialchars($lead['area'] ?? ($lead['location'] ?? 'N/A')) . "</p>"
+          . "<p><strong>Budget / Investment:</strong> " . htmlspecialchars($lead['budget'] ?? ($lead['investment_capacity'] ?? 'Not Specified')) . "</p>"
+          . "<p><strong>Source:</strong> AI Franchise Chatbot</p>"
+          . "<hr/>"
+          . "<h4>Chat Transcript:</h4>"
+          . "<pre style='white-space: pre-wrap; font-family: sans-serif; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;'>" . htmlspecialchars($transcript) . "</pre>";
+}
 
 $payload = [
     'from' => 'Convenio Mart AI Bot <info@atyourdoor.life>',
-    'to' => [$to],
+    'to' => is_array($to) ? $to : [$to],
     'subject' => $subject,
     'html' => $html
 ];

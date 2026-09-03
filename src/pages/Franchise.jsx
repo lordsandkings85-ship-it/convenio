@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Check, ClipboardList, PhoneCall, MapPin, Rocket, LayoutDashboard, Truck, Megaphone, Users, ChevronDown, ChevronUp, CheckCircle, Send } from 'lucide-react';
 import SEO from '../components/SEO';
 import AppShowcase from '../components/AppShowcase';
+import { createEnquiry } from '../lib/api';
 import './Franchise.css';
 
 const faqs = [
@@ -46,36 +47,114 @@ const Franchise = () => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    const fullName = data["Full Name"] || "";
+    const mobile = data["Mobile Number"] || "";
+    const email = data["Email Address"] || "";
+    const city = data["City / Location"] || "";
+    const message = data["Message"] || "";
 
-    // Formsubmit visual customization
-    data["_template"] = "table";
-    data["_subject"] = `New Franchise Application from ${data["Full Name"] || "Applicant"}`;
-
-    fetch("https://formsubmit.co/ajax/conveniomart@lordsandkingsagro.com", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(resData => {
-        setIsSubmitting(false);
-        setIsSuccess(true);
-      })
-      .catch(error => {
-        console.error("Form submission error:", error);
-        setIsSubmitting(false);
-        // Fallback to success so user flow is not blocked if service is momentarily offline
-        setIsSuccess(true);
+    // 1. Save lead to Supabase Database (for Admin Dashboard)
+    try {
+      await createEnquiry({
+        name: fullName,
+        phone: mobile,
+        email: email,
+        location: city,
+        notes: message,
+        status: 'NEW',
+        source: 'FORM'
       });
+    } catch (dbErr) {
+      console.warn('Database lead save notice:', dbErr);
+    }
+
+    // 2. Send email notification to conveniomart@lordsandkingsagro.com
+    try {
+      let emailSent = false;
+
+      // Try Hostinger PHP endpoint
+      try {
+        const res = await fetch('/api/send-email.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: 'conveniomart@lordsandkingsagro.com',
+            subject: `New Franchise Lead: ${fullName} (${city})`,
+            leadData: {
+              name: fullName,
+              phone: mobile,
+              email: email,
+              location: city,
+              notes: message
+            },
+            html: `
+              <h3>New Franchise Enquiry Form Submission</h3>
+              <p><strong>Name:</strong> ${fullName}</p>
+              <p><strong>Mobile:</strong> ${mobile}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>City / Location:</strong> ${city}</p>
+              <p><strong>Message:</strong> ${message || 'N/A'}</p>
+              <p><strong>Source:</strong> Franchise Web Form</p>
+            `
+          })
+        });
+        if (res.ok) emailSent = true;
+      } catch (e) {
+        // Continue to fallback
+      }
+
+      // Try Resend proxy
+      if (!emailSent) {
+        try {
+          const res = await fetch('/api/resend/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'Convenio Mart Leads <info@atyourdoor.life>',
+              to: ['conveniomart@lordsandkingsagro.com'],
+              subject: `New Franchise Lead: ${fullName} (${city})`,
+              html: `
+                <h3>New Franchise Enquiry Form Submission</h3>
+                <p><strong>Name:</strong> ${fullName}</p>
+                <p><strong>Mobile:</strong> ${mobile}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>City / Location:</strong> ${city}</p>
+                <p><strong>Message:</strong> ${message || 'N/A'}</p>
+                <p><strong>Source:</strong> Franchise Web Form</p>
+              `
+            })
+          });
+          if (res.ok) emailSent = true;
+        } catch (e) {
+          // Continue to fallback
+        }
+      }
+
+      // Fallback to FormSubmit AJAX
+      if (!emailSent) {
+        data["_template"] = "table";
+        data["_subject"] = `New Franchise Application from ${fullName || "Applicant"}`;
+        await fetch("https://formsubmit.co/ajax/conveniomart@lordsandkingsagro.com", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+      }
+    } catch (error) {
+      console.warn("Email send notification notice:", error);
+    } finally {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+    }
   };
 
   return (

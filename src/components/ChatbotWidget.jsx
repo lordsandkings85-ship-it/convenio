@@ -144,8 +144,30 @@ export default function ChatbotWidget() {
       const groqModel = import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b';
 
       const sendChatRequest = async (modelName) => {
+        // 1. Try local dev proxy / Vercel proxy (/api/groq)
         try {
-          return await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          const res = await fetch('/api/groq/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(groqApiKey ? { 'Authorization': `Bearer ${groqApiKey}` } : {})
+            },
+            body: JSON.stringify({
+              model: modelName,
+              messages: payloadMessages,
+              temperature: 0.7,
+              max_completion_tokens: 1024,
+              top_p: 1
+            })
+          });
+          if (res.ok) return res;
+        } catch (proxyErr) {
+          // Continue to next fallback
+        }
+
+        // 2. Try direct Groq API
+        try {
+          const directRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -159,19 +181,23 @@ export default function ChatbotWidget() {
               top_p: 1
             })
           });
+          if (directRes.ok) return directRes;
         } catch (directErr) {
-          return await fetch('/api/chat.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: modelName,
-              messages: payloadMessages,
-              temperature: 0.7,
-              max_completion_tokens: 1024,
-              top_p: 1
-            })
-          });
+          // Continue to next fallback
         }
+
+        // 3. Try Hostinger / Apache PHP endpoint (/api/chat.php)
+        return await fetch('/api/chat.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: modelName,
+            messages: payloadMessages,
+            temperature: 0.7,
+            max_completion_tokens: 1024,
+            top_p: 1
+          })
+        });
       };
 
       let response = await sendChatRequest(groqModel);
@@ -241,6 +267,7 @@ export default function ChatbotWidget() {
 
             const transcript = newMessages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
 
+            // 1. Save lead to Supabase enquiries database (for Admin Dashboard)
             try {
               const newEnquiry = await createEnquiry({
                 name: leadData.name,
@@ -260,19 +287,80 @@ export default function ChatbotWidget() {
               console.error("Supabase insert error:", dbError);
             }
 
+            // 2. Send Instant Email Notification to conveniomart@lordsandkingsagro.com
             try {
-              await fetch('/api/send-email.php', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  to: 'conveniomart@lordsandkingsagro.com',
-                  subject: `New AI Chatbot Lead: ${leadData.name} (${leadData.area})`,
-                  leadData,
-                  transcript: transcript + `\n\nASSISTANT: ${aiResponse.trim()}`
-                })
-              });
+              let emailSent = false;
+
+              // Try Hostinger PHP endpoint (/api/send-email.php)
+              try {
+                const res = await fetch('/api/send-email.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    to: 'conveniomart@lordsandkingsagro.com',
+                    subject: `New AI Chatbot Lead: ${leadData.name} (${leadData.area})`,
+                    leadData,
+                    transcript: transcript + `\n\nASSISTANT: ${aiResponse.trim()}`
+                  })
+                });
+                if (res.ok) emailSent = true;
+              } catch (err) {
+                // Continue to next fallback
+              }
+
+              // Try Resend API proxy (/api/resend/emails)
+              if (!emailSent) {
+                try {
+                  const res = await fetch('/api/resend/emails', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      from: 'Convenio Mart AI Bot <info@atyourdoor.life>',
+                      to: ['conveniomart@lordsandkingsagro.com'],
+                      subject: `New AI Chatbot Lead: ${leadData.name} (${leadData.area})`,
+                      html: `
+                        <h3>New AI Chatbot Lead</h3>
+                        <p><strong>Name:</strong> ${leadData.name}</p>
+                        <p><strong>Phone:</strong> ${leadData.phone}</p>
+                        <p><strong>Area:</strong> ${leadData.area}</p>
+                        <p><strong>Budget:</strong> ${leadData.budget}</p>
+                        <p><strong>Source:</strong> AI Franchise Chatbot</p>
+                        <hr/>
+                        <h4>Chat Transcript:</h4>
+                        <pre style="white-space: pre-wrap; font-family: sans-serif;">${transcript + `\n\nASSISTANT: ${aiResponse.trim()}`}</pre>
+                      `
+                    })
+                  });
+                  if (res.ok) emailSent = true;
+                } catch (err) {
+                  // Continue to next fallback
+                }
+              }
+
+              // Fallback to FormSubmit to guarantee email delivery to conveniomart@lordsandkingsagro.com
+              if (!emailSent) {
+                try {
+                  await fetch('https://formsubmit.co/ajax/conveniomart@lordsandkingsagro.com', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      _subject: `New AI Chatbot Lead: ${leadData.name} (${leadData.area})`,
+                      _template: 'table',
+                      "Lead Name": leadData.name,
+                      "Phone Number": leadData.phone,
+                      "Location / Area": leadData.area,
+                      "Budget / Capacity": leadData.budget,
+                      "Source": "AI Franchise Chatbot",
+                      "Transcript": transcript + `\n\nASSISTANT: ${aiResponse.trim()}`
+                    })
+                  });
+                } catch (formSubmitErr) {
+                  console.error("All email send methods failed:", formSubmitErr);
+                }
+              }
             } catch (emailErr) {
               console.error("Resend email notification error:", emailErr);
             }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, AlertCircle, ShieldAlert } from 'lucide-react';
+import '../admin.css';
 
 export default function AdminLogin({ onLogin }) {
   const [username, setUsername] = useState('');

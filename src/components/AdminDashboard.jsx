@@ -9,6 +9,8 @@ import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import BottomNav from './BottomNav';
 import { useIsMobile } from '../hooks/useWindowSize';
+import '../admin.css';
+import '../admin-overrides.css';
 
 export default function AdminDashboard({ onLogout }) {
   const [searchParams, setSearchParams] = useSearchParams();
