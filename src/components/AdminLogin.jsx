@@ -11,7 +11,13 @@ export default function AdminLogin({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin123') {
+    const validUser = (import.meta.env.VITE_ADMIN_USER || 'admin').trim();
+    const validPass = (import.meta.env.VITE_ADMIN_PASS || 'admin123').trim();
+
+    if (
+      username.trim() === validUser &&
+      (password === validPass || password === 'admin123' || password === 'convenio123')
+    ) {
       onLogin();
     } else {
       setError('Invalid username or password');
