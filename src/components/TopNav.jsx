@@ -17,8 +17,8 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
           getEnquiries('NEW'),
           getDueTasks()
         ]);
-        setNewLeads(leads.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
-        setDueTasks(tasks);
+        setNewLeads(Array.isArray(leads) ? [...leads].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : []);
+        setDueTasks(Array.isArray(tasks) ? tasks : []);
       } catch (error) {
         console.error('Failed to fetch notifications', error);
       }

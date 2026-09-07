@@ -8,26 +8,37 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchLeads = async () => {
       try {
         const data = await getEnquiries();
-        setEnquiries(data);
+        if (isMounted) {
+          setEnquiries(Array.isArray(data) ? data : []);
+        }
       } catch (err) {
         console.error("Failed to load leads for reports", err);
+        if (isMounted) {
+          setEnquiries([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     fetchLeads();
+    return () => { isMounted = false; };
   }, []);
+
+  const safeEnquiries = Array.isArray(enquiries) ? enquiries : [];
 
   // --- CSV Export Logic ---
   const handleExportCSV = () => {
-    if (enquiries.length === 0) return;
+    if (safeEnquiries.length === 0) return;
     
     const headers = ['ID', 'Name', 'Phone', 'Email', 'Location', 'Investment Capacity', 'Source', 'Status', 'Score', 'Created At'];
     
-    const rows = enquiries.map(e => [
+    const rows = safeEnquiries.map(e => [
       e.id,
       `"${e.name || ''}"`,
       `"${e.phone || ''}"`,
@@ -56,10 +67,10 @@ export default function ReportsPage() {
   
   // 1. Funnel
   const funnelData = [
-    { name: 'Total Leads', count: enquiries.length, color: '#3b82f6' }, // blue
-    { name: 'Contacted', count: enquiries.filter(e => e.status !== 'NEW').length, color: '#f59e0b' }, // amber
-    { name: 'Interested', count: enquiries.filter(e => ['INTERESTED', 'EVALUATING', 'NEGOTIATION', 'CLOSED'].includes(e.status)).length, color: '#8b5cf6' }, // purple
-    { name: 'Closed (Won)', count: enquiries.filter(e => e.status === 'CLOSED').length, color: '#10b981' } // emerald
+    { name: 'Total Leads', count: safeEnquiries.length, color: '#3b82f6' },
+    { name: 'Contacted', count: safeEnquiries.filter(e => e && e.status !== 'NEW').length, color: '#f59e0b' },
+    { name: 'Interested', count: safeEnquiries.filter(e => e && ['INTERESTED', 'EVALUATING', 'NEGOTIATION', 'READY_TO_PAY', 'PAYMENT_RECEIVED', 'APPROVED', 'COMPLETED', 'CLOSED'].includes(e.status)).length, color: '#8b5cf6' },
+    { name: 'Approved/Won', count: safeEnquiries.filter(e => e && ['APPROVED', 'COMPLETED', 'CLOSED'].includes(e.status)).length, color: '#10b981' }
   ];
 
   // 2. Response Times
@@ -69,17 +80,17 @@ export default function ReportsPage() {
 
   const now = new Date();
 
-  enquiries.forEach(e => {
+  safeEnquiries.forEach(e => {
+    if (!e || !e.created_at) return;
     const created = new Date(e.created_at);
     
     if (e.status !== 'NEW') {
-      const updated = new Date(e.updated_at);
+      const updated = e.updated_at ? new Date(e.updated_at) : created;
       if (updated > created) {
         totalResponseTimeMs += (updated - created);
         respondedCount++;
       }
     } else {
-      // It's still NEW, check if it's stagnant (> 24 hours)
       const hoursDiff = (now - created) / (1000 * 60 * 60);
       if (hoursDiff > 24) {
         stagnantCount++;

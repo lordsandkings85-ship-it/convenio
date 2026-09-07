@@ -56,7 +56,7 @@ const Franchise = () => {
     const fullName = data["Full Name"] || "";
     const mobile = data["Mobile Number"] || "";
     const email = data["Email Address"] || "";
-    const city = data["City / Location"] || "";
+    const city = data["City / Location"] || data["City or Location"] || data["city"] || "";
     const message = data["Message"] || "";
 
     // 1. Save lead to Supabase Database (for Admin Dashboard)

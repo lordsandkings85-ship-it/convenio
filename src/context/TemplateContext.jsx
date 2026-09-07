@@ -115,31 +115,20 @@ const defaultTemplatesList = [
 const TemplateContext = createContext();
 
 export function TemplateProvider({ children }) {
-  const [templates, setTemplates] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [templates, setTemplates] = useState(defaultTemplatesList);
+  const [isLoading, setIsLoading] = useState(false);
 
   const refreshTemplates = async () => {
     try {
-      setIsLoading(true);
       const dbTemplates = await getTemplates();
-
-      for (const dt of defaultTemplatesList) {
-        const existing = dbTemplates.find(
-          lt => lt.status_trigger === dt.statusTrigger && lt.type === dt.type && lt.is_system
-        );
-        if (!existing) {
-          await saveTemplate(dt);
-        } else if (existing.body !== dt.body || existing.name !== dt.name) {
-          await saveTemplate({ ...dt, id: existing.id, name: dt.name, body: dt.body });
-        }
+      if (Array.isArray(dbTemplates) && dbTemplates.length > 0) {
+        setTemplates(dbTemplates);
+      } else {
+        setTemplates(defaultTemplatesList);
       }
-
-      const updated = await getTemplates();
-      setTemplates(updated || []);
     } catch (err) {
-      console.error('Failed to load/seed templates in context:', err);
-    } finally {
-      setIsLoading(false);
+      console.warn('Using default fallback templates:', err.message);
+      setTemplates(defaultTemplatesList);
     }
   };
 
