@@ -250,10 +250,6 @@ a:active {
   .admin-main-content {
     margin-left: 240px !important;
   }
-  /* Hide mobile bottom nav on desktop */
-  .mobile-bottom-nav {
-    display: none !important;
-  }
 }
 
 /* Mobile/Tablet (<1024px): hide desktop sidebar, show hamburger */
@@ -285,7 +281,6 @@ a:active {
   .admin-main-content > main {
     padding: 12px !important;
     padding-top: 78px !important;
-    padding-bottom: 80px !important;
   }
 }
 

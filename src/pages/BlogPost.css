@@ -234,6 +234,14 @@
     max-width: 100%;
   }
 
+  .blog-post-page {
+    padding: 3rem 0 4.5rem;
+  }
+
+  .blog-post-back {
+    margin-bottom: 1.5rem;
+  }
+
   .blog-post-header,
   .blog-post-content {
     padding: 1.75rem 1.5rem;
@@ -241,5 +249,79 @@
 
   .blog-post-cover {
     aspect-ratio: 16 / 9;
+    margin-bottom: 1.5rem;
+  }
+
+  .blog-post-meta {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .blog-post-page {
+    padding: 2.5rem 0 4rem;
+  }
+
+  .blog-post-header,
+  .blog-post-content {
+    padding: 1.4rem 1.15rem;
+    border-radius: 18px;
+  }
+
+  .blog-post-header h1 {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .blog-post-meta {
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .blog-post-excerpt {
+    font-size: 1.05rem;
+  }
+
+  .blog-post-cover {
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+  }
+
+  .blog-post-article {
+    max-width: 100%;
+  }
+
+  .blog-post-content {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .blog-post-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .blog-post-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .blog-post-content blockquote {
+    padding: 1rem 1.1rem;
+    margin: 1.5rem 0;
+  }
+
+  .blog-post-content pre {
+    padding: 1.1rem;
+    margin: 1.5rem 0;
+    border-radius: 12px;
+  }
+
+  .blog-post-content ul,
+  .blog-post-content ol {
+    padding-left: 1.3rem;
+  }
+
+  .blog-post-footer .btn-primary {
+    width: 100%;
   }
 }

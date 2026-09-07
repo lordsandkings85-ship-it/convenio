@@ -8,7 +8,6 @@ import TemplatesPage from './TemplatesPage';
 import BlogPostsPage from './BlogPostsPage';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
-import BottomNav from './BottomNav';
 import { useIsMobile } from '../hooks/useWindowSize';
 import '../admin.css';
 import '../admin-overrides.css';
@@ -75,7 +74,7 @@ return (
         />
 
         {/* Page content — padded below fixed topnav */}
-        <main style={{ flex: 1, padding: '24px', paddingTop: '84px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: isMobile ? '80px' : '24px', minWidth: 0, overflowX: 'hidden' }}>
+        <main style={{ flex: 1, padding: '24px', paddingTop: '84px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '24px', minWidth: 0, overflowX: 'hidden' }}>
           {activeTab === 'dashboard'  && <FranchiseDashboard />}
           {activeTab === 'leads'      && <LeadsPage highlightedLeadId={highlightedLeadId} />}
           {activeTab === 'reports'    && <ReportsPage />}
@@ -83,9 +82,6 @@ return (
           {activeTab === 'blog'       && <BlogPostsPage />}
         </main>
       </div>
-
-      {/* Mobile bottom nav */}
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Settings Modal */}
       {showSettingsModal && (

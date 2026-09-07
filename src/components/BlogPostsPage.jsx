@@ -189,7 +189,7 @@ export default function BlogPostsPage() {
           )}
         </>
       ) : (
-        <div className="bg-white rounded-2xl shadow-elevated border border-borderMuted/40 p-6 anim-scale-in">
+        <div className="bg-white rounded-2xl shadow-elevated border border-borderMuted/40 p-4 sm:p-6 anim-scale-in">
           <div className="flex justify-between items-center mb-6 border-b border-borderMuted/60 pb-4">
             <div style={{ fontSize: '18px', fontWeight: '800', color: '#0b1120' }}>{editingPost.id ? 'Edit Post' : 'New Post'}</div>
             <button onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }} className="p-2 text-inkLight/60 hover:text-inkLight hover:bg-surface rounded-full transition-all duration-200">
@@ -296,7 +296,7 @@ export default function BlogPostsPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-4 pt-4 border-t border-borderMuted/60">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-borderMuted/60">
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <button
                   type="button"
@@ -317,17 +317,17 @@ export default function BlogPostsPage() {
                 </span>
               </label>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm text-inkLight bg-surface hover:bg-borderMuted/60 transition-all duration-200 active:scale-95"
+                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-sm text-inkLight bg-surface hover:bg-borderMuted/60 transition-all duration-200 active:scale-95"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 bg-gradient-to-r from-primary to-[#b8151d] hover:shadow-lg hover:shadow-primary/20 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md active:scale-95 btn-press"
+                  className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#b8151d] hover:shadow-lg hover:shadow-primary/20 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md active:scale-95 btn-press"
                 >
                   <Save className="h-4 w-4" /> Save Post
                 </button>
