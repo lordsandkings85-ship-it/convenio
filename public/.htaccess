@@ -16,11 +16,12 @@
   # RewriteCond %{HTTPS} !=on
   # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
-  # Allow existing files and directories to be served directly
+  # Allow existing files, directories, and symlinks to be served directly
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule ^(.*)$ /index.html [L]
 </IfModule>
 
 # 3. MIME Types
