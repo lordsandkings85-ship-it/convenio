@@ -252,14 +252,14 @@ export default function FranchiseDashboard() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
         {[
-          { label: 'Total Leads', value: totalEnquiries, trend: '↑ 2 today', trendColor: '#10b981', iconBg: '#eff6ff', iconColor: '#3b82f6', Icon: Users },
-          { label: 'Chat Leads', value: chatLeads, trend: '0%', trendColor: '#94a3b8', iconBg: '#faf5ff', iconColor: '#a855f7', Icon: MessageSquare },
-          { label: 'Form Leads', value: formLeads, trend: '↑ 100%', trendColor: '#10b981', iconBg: '#f0fdf4', iconColor: '#22c55e', Icon: FileText },
-          { label: 'Conversions', value: conversions, trend: '0%', trendColor: '#94a3b8', iconBg: '#fff7ed', iconColor: '#f97316', Icon: DollarSign },
+          { label: 'Total Leads', value: totalEnquiries, trend: `${totalEnquiries} total inquiries`, trendColor: '#3b82f6', iconBg: '#eff6ff', iconColor: '#3b82f6', Icon: Users },
+          { label: 'Chat Leads', value: chatLeads, trend: totalEnquiries > 0 ? `${Math.round((chatLeads / totalEnquiries) * 100)}% of total` : '0%', trendColor: '#a855f7', iconBg: '#faf5ff', iconColor: '#a855f7', Icon: MessageSquare },
+          { label: 'Form Leads', value: formLeads, trend: totalEnquiries > 0 ? `${Math.round((formLeads / totalEnquiries) * 100)}% of total` : '0%', trendColor: '#22c55e', iconBg: '#f0fdf4', iconColor: '#22c55e', Icon: FileText },
+          { label: 'Conversions', value: conversions, trend: totalEnquiries > 0 ? `${Math.round((conversions / totalEnquiries) * 100)}% conv. rate` : '0%', trendColor: '#f97316', iconBg: '#fff7ed', iconColor: '#f97316', Icon: DollarSign },
         ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
-          <div key={label} style={{ background: '#ffffff', border: '1px solid #eaeaea', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s ease' }}>
+          <div key={label} style={{ background: '#ffffff', border: '1px solid #eaeaea', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s ease' }} className="card-base card-lift">
             <div>
-              <p style={{ fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>{label}</p>
+              <p style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>{label}</p>
               <p style={{ fontSize: '28px', fontWeight: '900', color: '#0b1120', lineHeight: 1, marginBottom: '8px' }}>{value}</p>
               <p style={{ fontSize: '11px', fontWeight: '700', color: trendColor, display: 'flex', alignItems: 'center', gap: '4px' }}>{trend}</p>
             </div>
@@ -274,14 +274,15 @@ export default function FranchiseDashboard() {
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button 
           onClick={() => setShowCharts(!showCharts)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', border: '1px solid #eaeaea', color: '#1e293b', fontWeight: '700', fontSize: '13px', padding: '8px 16px', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s ease' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', border: '1.5px solid #e2e8f0', color: '#1e293b', fontWeight: '700', fontSize: '13px', padding: '8px 18px', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s ease' }}
+          className="hover:border-blue-500 hover:text-blue-600"
         >
           <BarChart3 style={{ width: '16px', height: '16px', color: '#3b82f6' }} />
-          {showCharts ? 'Hide Charts' : 'Charts'}
+          {showCharts ? 'Hide Visual Charts' : 'View Analytics & Charts'}
         </button>
       </div>
 
-      {showCharts && <AnalyticsCharts />}
+      {showCharts && <AnalyticsCharts enquiries={enquiries} />}
 
       <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #eaeaea', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '400px' }}>
         
