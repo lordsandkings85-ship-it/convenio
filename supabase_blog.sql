@@ -1,0 +1,41 @@
+-- Ensure the updated_at helper function exists (already defined by supabase_schema.sql in some setups)
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Blog Posts Table
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    title TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    excerpt TEXT,
+    content TEXT NOT NULL, -- Markdown content
+    cover_image TEXT,
+    author TEXT,
+    status TEXT DEFAULT 'DRAFT', -- 'DRAFT' or 'PUBLISHED'
+    created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+
+-- Create Policies for Public Access
+CREATE POLICY "Allow public full access on blog posts" ON public.blog_posts FOR ALL TO public USING (true);
+
+-- Trigger for blog_posts updated_at
+DROP TRIGGER IF EXISTS update_blog_posts_modtime ON public.blog_posts;
+CREATE TRIGGER update_blog_posts_modtime
+    BEFORE UPDATE ON public.blog_posts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_modified_column();
+
+-- Performance Indexes
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON public.blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON public.blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at ON public.blog_posts(created_at DESC);

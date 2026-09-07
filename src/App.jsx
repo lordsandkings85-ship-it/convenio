@@ -16,6 +16,8 @@ const Franchise = lazy(() => import('./pages/Franchise'));
 const Stores = lazy(() => import('./pages/Stores'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Careers = lazy(() => import('./pages/Careers'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminView = lazy(() => import('./components/AdminView'));
 
 function PublicLayout({ children }) {
@@ -95,6 +97,22 @@ function App() {
                     element={
                       <PublicLayout>
                         <Careers />
+                      </PublicLayout>
+                    }
+                  />
+                  <Route
+                    path="/blog"
+                    element={
+                      <PublicLayout>
+                        <Blog />
+                      </PublicLayout>
+                    }
+                  />
+                  <Route
+                    path="/blog/:slug"
+                    element={
+                      <PublicLayout>
+                        <BlogPost />
                       </PublicLayout>
                     }
                   />

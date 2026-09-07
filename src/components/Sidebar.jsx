@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, PieChart, MessageSquare, Database, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, MessageSquare, FileText, Database, Menu, X } from 'lucide-react';
 import { useIsMobile } from '../hooks/useWindowSize';
 
 const NAV_ITEMS = [
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { id: 'leads',     label: 'Leads',     icon: Users },
   { id: 'reports',   label: 'Reports',   icon: PieChart },
   { id: 'templates', label: 'Templates', icon: MessageSquare },
+  { id: 'blog',      label: 'Blog',      icon: FileText },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {

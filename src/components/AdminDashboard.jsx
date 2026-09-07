@@ -5,6 +5,7 @@ import FranchiseDashboard from './FranchiseDashboard';
 import LeadsPage from './LeadsPage';
 import ReportsPage from './ReportsPage';
 import TemplatesPage from './TemplatesPage';
+import BlogPostsPage from './BlogPostsPage';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import BottomNav from './BottomNav';
@@ -79,6 +80,7 @@ return (
           {activeTab === 'leads'      && <LeadsPage highlightedLeadId={highlightedLeadId} />}
           {activeTab === 'reports'    && <ReportsPage />}
           {activeTab === 'templates'  && <TemplatesPage />}
+          {activeTab === 'blog'       && <BlogPostsPage />}
         </main>
       </div>
 

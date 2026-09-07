@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, PieChart, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, PieChart, MessageSquare, FileText } from 'lucide-react';
 
 export default function BottomNav({ activeTab, setActiveTab }) {
   const navItems = [
@@ -7,6 +7,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
     { id: 'leads', label: 'Leads', icon: Users },
     { id: 'reports', label: 'Reports', icon: PieChart },
     { id: 'templates', label: 'Templates', icon: MessageSquare },
+    { id: 'blog', label: 'Blog', icon: FileText },
   ];
 
   return (

@@ -340,3 +340,73 @@ export async function deleteTemplate(id) {
   if (error) throw error;
 }
 
+/**
+ * Fetch blog posts, optionally only published ones
+ */
+export async function getBlogPosts({ publishedOnly = false } = {}) {
+  let query = supabase.from('blog_posts').select('*').order('created_at', { ascending: false });
+
+  if (publishedOnly) {
+    query = query.eq('status', 'PUBLISHED');
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Fetch a single published blog post by slug
+ */
+export async function getBlogPostBySlug(slug) {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'PUBLISHED')
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Create or Update a blog post
+ */
+export async function saveBlogPost(postData) {
+  const payload = {
+    title: postData.title,
+    slug: postData.slug,
+    excerpt: postData.excerpt || null,
+    content: postData.content,
+    cover_image: postData.cover_image || null,
+    author: postData.author || null,
+    status: postData.status || 'DRAFT'
+  };
+
+  if (postData.id) {
+    payload.id = postData.id;
+  }
+
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .upsert([payload])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Delete a blog post
+ */
+export async function deleteBlogPost(id) {
+  const { error } = await supabase
+    .from('blog_posts')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
