@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Save, Trash2, Edit2, X, Eye, Calendar, User, Image as ImageIcon, Newspaper } from 'lucide-react';
+import { Plus, Save, Trash2, Edit2, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getBlogPosts, saveBlogPost, deleteBlogPost } from '../lib/api';
 import { useDialog } from './Dialog';
@@ -103,217 +103,291 @@ export default function BlogPostsPage() {
     setIsEditing(true);
   };
 
+  const publishedCount = posts.filter(p => p.status === 'PUBLISHED').length;
+
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto w-full">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#0b1120', letterSpacing: '-0.02em', lineHeight: 1.2 }}>Blog Posts</div>
-          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500', marginTop: '4px' }}>Write and publish articles that appear on the public blog page.</div>
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <Newspaper className="w-5 h-5" />
+            </span>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Blog & Articles CMS</h1>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+            Write, optimize, and publish SEO content to drive franchise organic discovery.
+          </p>
         </div>
+        
         {!isEditing && (
-          <button
-            onClick={() => startEdit(null)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#b8151d] hover:shadow-lg hover:shadow-primary/20 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md w-full sm:w-auto shrink-0 active:scale-95 btn-press"
-          >
-            <Plus className="h-4 w-4" /> New Post
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex text-xs font-bold text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+              <strong className="text-emerald-600 mr-1">{publishedCount}</strong> Published / {posts.length} Total
+            </span>
+            <button
+              onClick={() => startEdit(null)}
+              className="admin-btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
+            >
+              <Plus className="h-4 w-4" /> New Post
+            </button>
+          </div>
         )}
       </div>
 
       {!isEditing ? (
         <>
           {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="loading-spinner"></div>
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Loading articles...</p>
+              </div>
             </div>
           ) : posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {posts.map(post => (
-                <div key={post.id} className="bg-white border border-borderMuted/60 rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col card-base card-lift overflow-hidden">
-                  <div className="h-40 bg-surface relative overflow-hidden">
+                <div key={post.id} className="bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group card-lift">
+                  {/* Cover Image */}
+                  <div className="h-44 bg-slate-100 relative overflow-hidden">
                     {post.cover_image ? (
                       <img
                         src={post.cover_image}
                         alt={post.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-surface to-borderMuted/40">
-                        <Newspaper className="h-10 w-10 text-inkLight/30" />
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-slate-400">
+                        <Newspaper className="h-10 w-10 opacity-30 mb-1" />
+                        <span className="text-[11px] font-bold text-slate-400">No cover image</span>
                       </div>
                     )}
+                    
+                    {/* Status Badge */}
                     <span
-                      className={`absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border shadow-sm ${
+                      className={`absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm backdrop-blur-md ${
                         post.status === 'PUBLISHED'
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                          : 'bg-amber-50 text-amber-600 border-amber-100'
+                          ? 'bg-emerald-500/90 text-white shadow-emerald-500/20'
+                          : 'bg-amber-500/90 text-white shadow-amber-500/20'
                       }`}
                     >
-                      {post.status === 'PUBLISHED' ? <Eye className="h-3 w-3" /> : <Plus className="h-3 w-3 rotate-45" />}
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                       {post.status === 'PUBLISHED' ? 'Published' : 'Draft'}
                     </span>
                   </div>
+
+                  {/* Body Content */}
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex justify-between items-start gap-2 mb-2">
-                      <div style={{ fontWeight: '700', color: '#0b1120', fontSize: '15px', lineHeight: 1.35 }}>{post.title}</div>
-                      <div className="flex gap-1 shrink-0">
-                        <button onClick={() => startEdit(post)} className="p-2 hover:bg-borderMuted text-inkLight/70 hover:text-inkLight rounded-lg transition-colors" title="Edit">
+                      <h3 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
+                        {post.title}
+                      </h3>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button 
+                          onClick={() => startEdit(post)} 
+                          className="admin-icon-btn p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100" 
+                          title="Edit Post"
+                        >
                           <Edit2 className="h-4 w-4" />
                         </button>
-                        <button onClick={() => handleDelete(post.id)} className="p-2 hover:bg-primary/10 text-inkLight/70 hover:text-primary rounded-lg transition-colors" title="Delete">
+                        <button 
+                          onClick={() => handleDelete(post.id)} 
+                          className="admin-icon-btn p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50" 
+                          title="Delete Post"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
 
                     {post.excerpt && (
-                      <p className="text-sm text-inkLight leading-relaxed mb-4 line-clamp-2 flex-1">{post.excerpt}</p>
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+                        {post.excerpt}
+                      </p>
                     )}
 
-                    <div className="flex items-center gap-4 text-[11px] font-semibold text-inkLight/70 mt-auto pt-3 border-t border-borderMuted/60">
-                      {post.author && (
-                        <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {post.author}</span>
-                      )}
-                      <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {formatDate(post.created_at)}</span>
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mt-auto pt-3 border-t border-slate-100">
+                      <span className="flex items-center gap-1.5 truncate max-w-[140px]">
+                        <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{post.author || 'Editorial Team'}</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 shrink-0">
+                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                        {formatDate(post.created_at)}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="py-16 text-center bg-white border border-borderMuted rounded-2xl border-dashed">
-              <Newspaper className="h-10 w-10 mx-auto mb-3 text-inkLight/30" />
-              <p className="text-inkLight font-medium">No blog posts yet. Click "New Post" to create your first article!</p>
+            <div className="py-20 text-center bg-white border border-slate-200 rounded-2xl border-dashed">
+              <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <Newspaper className="h-6 w-6" />
+              </div>
+              <p className="text-sm font-bold text-slate-700">No blog posts found</p>
+              <p className="text-xs text-slate-400 mt-1">Click "New Post" above to write your first franchise marketing article.</p>
             </div>
           )}
         </>
       ) : (
-        <div className="bg-white rounded-2xl shadow-elevated border border-borderMuted/40 p-4 sm:p-6 anim-scale-in">
-          <div className="flex justify-between items-center mb-6 border-b border-borderMuted/60 pb-4">
-            <div style={{ fontSize: '18px', fontWeight: '800', color: '#0b1120' }}>{editingPost.id ? 'Edit Post' : 'New Post'}</div>
-            <button onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }} className="p-2 text-inkLight/60 hover:text-inkLight hover:bg-surface rounded-full transition-all duration-200">
+        /* Blog Post Editor */
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200/80 p-6">
+          <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-xl font-black text-slate-900">{editingPost.id ? 'Edit Blog Post' : 'Create New Article'}</h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">Author SEO-friendly articles formatted with rich markdown.</p>
+            </div>
+            <button 
+              onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }} 
+              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           <form onSubmit={handleSavePost} className="flex flex-col gap-5">
             <div>
-              <label className="block text-sm font-bold text-ink mb-1.5">Title</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Article Headline / Title</label>
               <input
                 type="text"
                 required
-                placeholder="e.g., Why a Mini-Supermarket Franchise Makes Sense in 2026"
+                placeholder="e.g. Why Mini-Supermarket Franchises Are Booming in 2026"
                 value={editingPost.title}
-                onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
-                className="w-full border border-borderMuted rounded-xl p-3 outline-none focus:border-primary transition-colors font-medium text-ink"
+                onChange={(e) => {
+                  const title = e.target.value;
+                  setEditingPost({
+                    ...editingPost,
+                    title,
+                    slug: editingPost.id ? editingPost.slug : slugify(title)
+                  });
+                }}
+                className="w-full border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 transition-all font-bold text-sm text-slate-900 shadow-sm"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-bold text-ink mb-1.5">Slug / URL</label>
-                <div className="flex items-center">
-                  <span className="text-sm text-inkLight/60 font-medium mr-2 whitespace-nowrap">/blog/</span>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">URL Slug</label>
+                <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 px-3 shadow-sm focus-within:border-emerald-500 focus-within:bg-white transition-all">
+                  <span className="text-xs font-bold text-slate-400 select-none mr-1">/blog/</span>
                   <input
                     type="text"
                     required
-                    placeholder="e.g., mini-supermarket-franchise-2026"
+                    placeholder="mini-supermarket-franchise-2026"
                     value={editingPost.slug}
                     onChange={(e) => handleSlugChange(e.target.value)}
-                    className="w-full border border-borderMuted rounded-xl p-3 outline-none focus:border-primary transition-colors font-medium text-ink"
+                    className="w-full py-3 bg-transparent outline-none font-mono text-xs text-slate-800"
                   />
                 </div>
-                <p className="text-xs text-inkLight mt-1.5">Auto-generated from the title. Use only lowercase letters, numbers, and hyphens.</p>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-ink mb-1.5">Author</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Convenio Mart Team"
-                  value={editingPost.author}
-                  onChange={(e) => setEditingPost({ ...editingPost, author: e.target.value })}
-                  className="w-full border border-borderMuted rounded-xl p-3 outline-none focus:border-primary transition-colors font-medium text-ink"
-                />
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Author Name</label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="e.g. Convenio Mart Franchise Team"
+                    value={editingPost.author}
+                    onChange={(e) => setEditingPost({ ...editingPost, author: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-3 pl-10 outline-none focus:border-emerald-500 transition-all font-semibold text-xs text-slate-800 shadow-sm"
+                  />
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-ink mb-1.5">Excerpt / Short Summary</label>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Short Excerpt / Meta Description</label>
               <textarea
                 rows={2}
-                placeholder="A short teaser shown on the blog listing page and for SEO."
+                placeholder="A compelling 1-2 sentence teaser shown on the blog index cards and search results."
                 value={editingPost.excerpt}
                 onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })}
-                className="w-full border border-borderMuted rounded-xl p-3 outline-none focus:border-primary transition-colors font-medium text-ink"
+                className="w-full border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 transition-all font-medium text-xs text-slate-800 shadow-sm leading-relaxed"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-ink mb-1.5">Cover Image URL</label>
-              <div className="flex items-center relative">
-                <ImageIcon className="absolute left-3 h-5 w-5 text-inkLight/70" />
-                <input
-                  type="url"
-                  placeholder="https://example.com/cover-image.jpg"
-                  value={editingPost.cover_image}
-                  onChange={(e) => setEditingPost({ ...editingPost, cover_image: e.target.value })}
-                  className="w-full border border-borderMuted rounded-xl p-3 pl-10 outline-none focus:border-primary transition-colors font-medium text-ink"
-                />
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Cover Image URL</label>
+              <div className="flex gap-4 items-center">
+                <div className="relative flex-1">
+                  <ImageIcon className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="url"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={editingPost.cover_image}
+                    onChange={(e) => setEditingPost({ ...editingPost, cover_image: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-3 pl-10 outline-none focus:border-emerald-500 transition-all font-medium text-xs text-slate-800 shadow-sm"
+                  />
+                </div>
+                {editingPost.cover_image && (
+                  <div className="w-16 h-11 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
+                    <img src={editingPost.cover_image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-inkLight mt-1.5">Paste a hosted image URL. Shown as the post thumbnail on the blog listing page.</p>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-bold text-ink">Content (Markdown)</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Article Body (Markdown Supported)
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowPreview(!showPreview)}
-                  className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors ${showPreview ? 'bg-primary/8 text-primary border-primary/30' : 'text-inkLight bg-surface border-borderMuted hover:bg-borderMuted/60'}`}
+                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
+                    showPreview 
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                      : 'text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  }`}
                 >
-                  <Eye className="h-3.5 w-3.5 inline-block mr-1" /> {showPreview ? 'Edit' : 'Preview'}
+                  <Eye className="h-3.5 w-3.5" />
+                  {showPreview ? 'Switch to Markdown Editor' : 'Live Preview'}
                 </button>
               </div>
+
               {showPreview ? (
-                <div className="bg-surface rounded-xl border border-borderMuted p-5 prose max-w-none">
+                <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 prose max-w-none text-xs text-slate-800 leading-relaxed min-h-[300px]">
                   {editingPost.content ? (
                     <ReactMarkdown>{editingPost.content}</ReactMarkdown>
                   ) : (
-                    <p className="text-inkLight/60 italic">Nothing to preview yet — start writing below.</p>
+                    <p className="text-slate-400 italic">No content typed yet. Switch back to editor to begin.</p>
                   )}
                 </div>
               ) : (
                 <textarea
                   required
                   rows={14}
-                  placeholder={'# Heading&#10;&#10;Write your article in Markdown here...'}
+                  placeholder={'## Introduction\n\nConvenio Mart offers an exceptional franchise opportunity...\n\n### Key Benefits\n- High ROI\n- Complete supply chain support'}
                   value={editingPost.content}
                   onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
-                  className="w-full border border-borderMuted rounded-xl p-3 outline-none focus:border-primary transition-colors font-mono text-sm text-ink"
+                  className="w-full border border-slate-200 rounded-xl p-4 outline-none focus:border-emerald-500 transition-all font-mono text-xs text-slate-800 shadow-sm leading-relaxed"
                 />
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-borderMuted/60">
-              <label className="flex items-center gap-2.5 cursor-pointer">
+            {/* Publication Status & Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-5 border-t border-slate-100">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
                 <button
                   type="button"
                   onClick={() => setEditingPost({ ...editingPost, status: editingPost.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED' })}
-                  style={{
-                    width: '44px', height: '24px', borderRadius: '12px', padding: '2px',
-                    background: editingPost.status === 'PUBLISHED' ? '#059669' : '#e2e8f0',
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: editingPost.status === 'PUBLISHED' ? 'flex-end' : 'flex-start',
-                    border: 'none', cursor: 'pointer', flexShrink: 0,
-                    transition: 'all 0.3s ease',
-                  }}
+                  className={`w-12 h-6 rounded-full transition-colors flex items-center px-0.5 ${editingPost.status === 'PUBLISHED' ? 'bg-emerald-600 justify-end' : 'bg-slate-300 justify-start'}`}
                 >
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }} />
+                  <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
                 </button>
-                <span className="text-sm font-bold text-ink">
-                  {editingPost.status === 'PUBLISHED' ? 'Published — visible on the blog' : 'Draft — hidden from the blog'}
+                <span className="text-xs font-bold text-slate-700">
+                  {editingPost.status === 'PUBLISHED' ? (
+                    <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" /> Published (Live on Website)
+                    </span>
+                  ) : (
+                    <span className="text-slate-500">Draft (Hidden from Public)</span>
+                  )}
                 </span>
               </label>
 
@@ -321,15 +395,15 @@ export default function BlogPostsPage() {
                 <button
                   type="button"
                   onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }}
-                  className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-sm text-inkLight bg-surface hover:bg-borderMuted/60 transition-all duration-200 active:scale-95"
+                  className="admin-btn-outline flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex flex-1 sm:flex-none items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#b8151d] hover:shadow-lg hover:shadow-primary/20 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 shadow-md active:scale-95 btn-press"
+                  className="admin-btn-primary flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm"
                 >
-                  <Save className="h-4 w-4" /> Save Post
+                  <Save className="h-4 w-4" /> Save Article
                 </button>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getEnquiryDetails, updateEnquiryStatus, createFollowUpTask, updateTaskStatus, getTemplates, sendEmail } from '../lib/api';
 import { useDialog } from './Dialog';
-import { X, User, Phone, Mail, MapPin, Building, Calendar, Clock, CheckCircle2, MessageSquare, AlertCircle, Search, ChevronDown } from 'lucide-react';
+import { X, User, Phone, Mail, MapPin, Building, Calendar, Clock, CheckCircle2, MessageSquare, AlertCircle, Search, ChevronDown, Sparkles, Send, FileText, ArrowRight, ExternalLink } from 'lucide-react';
 import DraftReviewModal from './DraftReviewModal';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -73,7 +73,7 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
   const { showToast } = useDialog();
 
   // Tabs
-  const [activeTab, setActiveTab] = useState('details'); // details, timeline, tasks
+  const [activeTab, setActiveTab] = useState('details'); // details, timeline
 
   useEffect(() => {
     fetchDetails();
@@ -166,8 +166,6 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
   const handlePreviewTemplate = (template) => {
     setPreviewTemplate(template);
     
-    // Get Admin Name (for now, assume we can get it or just use "Admin")
-    // In a real app this would come from an auth context
     const adminName = "Admin"; 
 
     // Replace Tags
@@ -196,11 +194,9 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
 
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
-          // Direct native mobile app launch for Email
           const mailtoUrl = `mailto:${encodeURIComponent(data.email)}?subject=${encodeURIComponent(previewTemplate.name)}&body=${encodeURIComponent(plainBody)}`;
           window.location.href = mailtoUrl;
         } else {
-          // Desktop Web Gmail Compose
           const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(data.email)}&su=${encodeURIComponent(previewTemplate.name)}&body=${encodeURIComponent(plainBody)}`;
           openOrFocusTab('EMAIL', gmailUrl);
         }
@@ -239,163 +235,227 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
 
   if (loading || !data) {
     return (
-      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-navy/50 backdrop-blur-sm">
-         <div className="bg-white rounded-2xl p-8 shadow-elevated flex flex-col items-center anim-scale-in">
-            <div className="h-8 w-8 rounded-full border-4 border-borderMuted border-t-primary animate-spin mb-4"></div>
-            <p className="text-inkLight font-bold">Loading Details...</p>
-         </div>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col items-center">
+          <div className="h-9 w-9 rounded-full border-3 border-slate-200 border-t-emerald-600 animate-spin mb-3"></div>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Loading Applicant Dossier...</p>
+        </div>
       </div>
     );
   }
 
-  const pendingTasks = data.tasks ? data.tasks.filter(t => t.status !== 'COMPLETED') : [];
-
   return (
-    <div className="fixed inset-0 z-[70] flex justify-end bg-navy/60 backdrop-blur-sm overflow-hidden">
+    <div className="fixed inset-0 z-[70] flex justify-end bg-slate-900/60 backdrop-blur-sm overflow-hidden animate-in fade-in duration-200">
       {isDropdownOpen && <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />}
-      <div className="bg-white shadow-elevated w-full max-w-md h-full flex flex-col overflow-hidden anim-slide-right border-l border-borderMuted/40 min-w-0">
+      <div className="bg-white shadow-2xl w-full max-w-lg h-full flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 border-l border-slate-200 min-w-0">
         
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-borderMuted/60 flex justify-between items-center bg-gradient-to-r from-surface to-white shrink-0">
-          <div>
-            <h2 className="font-bold text-navy text-lg flex items-center gap-2">
-              <User className="h-5 w-5 text-primary"/> {data.name}
-            </h2>
-            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-borderMuted/60 text-ink mt-1 inline-block">
-              {data.status.replace(/_/g, ' ')}
-            </span>
+        {/* Drawer Header */}
+        <div className="p-5 border-b border-slate-200/80 bg-white shrink-0">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+                {data.name ? data.name.charAt(0).toUpperCase() : 'L'}
+              </div>
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-lg leading-tight">{data.name || 'Unnamed Applicant'}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+                    {data.status?.replace(/_/g, ' ')}
+                  </span>
+                  {data.score && (
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                      Score: {data.score}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={onClose} 
+              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-2 text-inkLight/60 hover:text-inkLight hover:bg-surface rounded-full transition-all duration-200">
-            <X className="h-5 w-5" />
-          </button>
+
+          {/* Tab Navigation */}
+          <div className="flex bg-slate-100 p-1 rounded-xl mt-4 border border-slate-200/80">
+            <button 
+              onClick={() => setActiveTab('details')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                activeTab === 'details' 
+                  ? 'bg-white text-slate-900 shadow-xs font-extrabold' 
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              Applicant Details
+            </button>
+            <button 
+              onClick={() => setActiveTab('timeline')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                activeTab === 'timeline' 
+                  ? 'bg-white text-slate-900 shadow-xs font-extrabold' 
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              Activity & History
+            </button>
+          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-borderMuted/60 bg-white shrink-0">
-          <button 
-            onClick={() => setActiveTab('details')}
-            className={`flex-1 py-3.5 text-sm font-bold border-b-2 transition-all duration-300 ${activeTab === 'details' ? 'border-primary text-primary' : 'border-transparent text-inkLight hover:text-ink'}`}
-          >
-            Lead Details
-          </button>
-          <button 
-            onClick={() => setActiveTab('timeline')}
-            className={`flex-1 py-3.5 text-sm font-bold border-b-2 transition-all duration-300 ${activeTab === 'timeline' ? 'border-primary text-primary' : 'border-transparent text-inkLight hover:text-ink'}`}
-          >
-            Timeline & Chat
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden bg-surface relative p-6 min-w-0">
+        {/* Drawer Body */}
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-5 space-y-5 min-w-0">
           
           {/* TAB: DETAILS */}
           {activeTab === 'details' && (
-            <div className="flex flex-col gap-6 min-w-0">
-              {/* Contact Info */}
-              <div className="bg-white p-5 rounded-2xl shadow-card border border-borderMuted/60 flex flex-col gap-4 min-w-0 card-base">
-                <h3 className="text-xs font-bold uppercase text-inkLight/60 tracking-wider">Contact Info</h3>
-                <div className="grid grid-cols-1 gap-3 text-sm flex-1 min-w-0">
-                  <div className="flex items-center gap-3 text-ink break-words min-w-0"><Phone className="h-4 w-4 text-inkLight/70 shrink-0"/> {data.phone}</div>
-                  {data.email && <div className="flex items-center gap-3 text-ink break-words min-w-0"><Mail className="h-4 w-4 text-inkLight/70 shrink-0"/> {data.email}</div>}
-                  <div className="flex items-center gap-3 text-ink break-words min-w-0"><MapPin className="h-4 w-4 text-inkLight/70 shrink-0"/> {data.location || 'N/A'}</div>
-                  <div className="flex items-center gap-3 text-ink break-words min-w-0"><Building className="h-4 w-4 text-inkLight/70 shrink-0"/> {data.investment_capacity || 'N/A'}</div>
-                  {data.property_status && <div className="flex items-center gap-3 text-ink break-words min-w-0"><Building className="h-4 w-4 text-inkLight/70 shrink-0"/> Property: {data.property_status}</div>}
-                  {data.carpet_area && <div className="flex items-center gap-3 text-ink break-words min-w-0"><Building className="h-4 w-4 text-inkLight/70 shrink-0"/> Carpet Area: {data.carpet_area} sq.ft</div>}
+            <div className="space-y-5 min-w-0">
+              {/* Contact Information Card */}
+              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-slate-400" /> Contact & Property Dossier
+                </h3>
+                
+                <div className="grid grid-cols-1 gap-3.5 text-xs font-semibold">
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 flex items-center gap-2"><Phone className="h-4 w-4 text-emerald-600 shrink-0"/> Phone</span>
+                    <a href={`tel:${data.phone}`} className="text-slate-900 hover:text-emerald-600 font-bold">{data.phone || 'N/A'}</a>
+                  </div>
+
+                  {data.email && (
+                    <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="text-slate-500 flex items-center gap-2"><Mail className="h-4 w-4 text-blue-600 shrink-0"/> Email</span>
+                      <a href={`mailto:${data.email}`} className="text-slate-900 hover:text-blue-600 font-bold truncate max-w-[200px]">{data.email}</a>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 flex items-center gap-2"><MapPin className="h-4 w-4 text-purple-600 shrink-0"/> Location</span>
+                    <span className="text-slate-900 font-bold">{data.location || 'N/A'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-slate-500 flex items-center gap-2"><Building className="h-4 w-4 text-amber-600 shrink-0"/> Investment</span>
+                    <span className="text-slate-900 font-bold">{data.investment_capacity || 'N/A'}</span>
+                  </div>
+
+                  {data.property_status && (
+                    <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="text-slate-500 flex items-center gap-2"><Building className="h-4 w-4 text-slate-400 shrink-0"/> Property Status</span>
+                      <span className="text-slate-900 font-bold">{data.property_status}</span>
+                    </div>
+                  )}
+
+                  {data.carpet_area && (
+                    <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="text-slate-500 flex items-center gap-2"><Building className="h-4 w-4 text-slate-400 shrink-0"/> Carpet Area</span>
+                      <span className="text-slate-900 font-bold">{data.carpet_area} sq.ft</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Quick Actions (Templates) */}
-              <div className="bg-white p-5 rounded-2xl shadow-card border border-borderMuted/60 flex flex-col gap-4 min-w-0 card-base">
-                <h3 className="text-xs font-bold uppercase text-inkLight/60 tracking-wider">Quick Messages</h3>
+              {/* Quick Communication Actions */}
+              <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+                <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-4 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> One-Click Communication
+                </h3>
                 
                 {previewTemplate ? (
-                  <div className="border border-borderMuted rounded-xl p-4 bg-surface animate-in fade-in min-w-0 overflow-hidden">
-                    <div className="flex justify-between items-center mb-3 border-b border-borderMuted pb-2">
-                      <div className="font-bold text-navy text-sm flex items-center gap-2 min-w-0">
-                        {previewTemplate.type === 'EMAIL' ? <Mail className="h-4 w-4 text-inkLight shrink-0"/> : <MessageSquare className="h-4 w-4 text-emerald-500 shrink-0"/>}
+                  <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 min-w-0">
+                    <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200">
+                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-2 min-w-0">
+                        {previewTemplate.type === 'EMAIL' ? <Mail className="h-4 w-4 text-blue-600 shrink-0"/> : <MessageSquare className="h-4 w-4 text-emerald-600 shrink-0"/>}
                         <span className="truncate">{previewTemplate.name}</span>
                       </div>
-                      <button onClick={() => setPreviewTemplate(null)} className="text-inkLight/70 hover:text-inkLight shrink-0">
+                      <button onClick={() => setPreviewTemplate(null)} className="text-slate-400 hover:text-slate-700">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
+
                     {previewTemplate.type === 'EMAIL' ? (
-                      <div className="mb-3 max-w-full overflow-hidden">
+                      <div className="mb-3 max-w-full rounded-lg overflow-hidden border border-slate-200 bg-white">
                         <ReactQuill 
                           theme="snow" 
                           value={previewBody} 
                           onChange={setPreviewBody}
-                          className="bg-white rounded-lg border border-borderMuted"
                         />
                       </div>
                     ) : (
                       <textarea 
-                        className="w-full text-sm font-mono text-ink p-3 rounded-lg border border-borderMuted focus:border-primary outline-none mb-3 break-words resize-y"
+                        className="w-full text-xs font-mono text-slate-800 p-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none mb-3 resize-y bg-white"
                         rows={6}
                         value={previewBody}
                         onChange={(e) => setPreviewBody(e.target.value)}
                       />
                     )}
+
                     {previewTemplate.attachment_url && (
-                      <div className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg mb-3 break-all overflow-hidden">
-                        Attachment: {previewTemplate.attachment_url}
+                      <div className="text-[11px] font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg mb-3 break-all flex items-center gap-1.5 border border-blue-100">
+                        <FileText className="w-3.5 h-3.5 shrink-0" /> Attachment: {previewTemplate.attachment_url}
                       </div>
                     )}
+
                     <button 
                       onClick={handleSendTemplate}
                       disabled={isSending}
-                      className="w-full bg-gradient-to-r from-navy to-[#1a2542] text-white font-bold text-sm py-2.5 rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-300 active:scale-[0.98] btn-press"
+                      className="admin-btn-primary w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all disabled:opacity-50"
                     >
-                      {isSending ? 'Sending...' : `Send ${previewTemplate.type === 'EMAIL' ? 'Email' : 'WhatsApp'}`}
+                      <Send className="w-3.5 h-3.5" />
+                      {isSending ? 'Launching App...' : `Send via ${previewTemplate.type === 'EMAIL' ? 'Gmail' : 'WhatsApp'}`}
                     </button>
                   </div>
                 ) : !selectedChannel ? (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => setSelectedChannel('EMAIL')}
-                      className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-borderMuted/60 hover:border-blue-500 hover:bg-blue-50/60 transition-all duration-300 group card-base"
+                      className="flex flex-col items-center gap-2.5 p-5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all group"
                     >
-                      <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-500 transition-all duration-300 shadow-sm shadow-blue-500/10">
-                        <Mail className="h-8 w-8 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                      <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
+                        <Mail className="h-6 w-6" />
                       </div>
-                      <span className="font-bold text-ink group-hover:text-blue-700 transition-colors duration-300">Send Email</span>
+                      <span className="font-bold text-xs text-slate-800 group-hover:text-blue-700">Send Email</span>
                     </button>
+                    
                     <button 
                       onClick={() => setSelectedChannel('WHATSAPP')}
-                      className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-borderMuted/60 hover:border-emerald-500 hover:bg-emerald-50/60 transition-all duration-300 group card-base"
+                      className="flex flex-col items-center gap-2.5 p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all group"
                     >
-                      <div className="bg-emerald-100 p-3 rounded-xl group-hover:bg-emerald-500 transition-all duration-300 shadow-sm shadow-emerald-500/10">
-                        <MessageSquare className="h-8 w-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+                      <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
+                        <MessageSquare className="h-6 w-6" />
                       </div>
-                      <span className="font-bold text-ink group-hover:text-emerald-700 transition-colors duration-300">Send WhatsApp</span>
+                      <span className="font-bold text-xs text-slate-800 group-hover:text-emerald-700">Send WhatsApp</span>
                     </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3 min-w-0">
+                  <div className="space-y-3 min-w-0">
                     <button 
                       onClick={() => setSelectedChannel(null)}
-                      className="text-xs font-bold text-inkLight hover:text-ink flex items-center gap-1 self-start"
+                      className="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1"
                     >
-                      &larr; Back to Options
+                      &larr; Choose Different Channel
                     </button>
-                    <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-1 animate-in fade-in slide-in-from-right-4 min-w-0">
-                      {templates.filter(t => t.type === selectedChannel).length > 0 ? templates.filter(t => t.type === selectedChannel).map(t => (
-                        <button 
-                          key={t.id}
-                          onClick={() => handlePreviewTemplate(t)}
-                          className="flex items-center justify-between p-3 rounded-xl border border-borderMuted hover:border-primary/40 hover:bg-primary/10 text-left transition-colors group min-w-0"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className={`p-1.5 rounded-lg shrink-0 ${t.type === 'EMAIL' ? 'bg-borderMuted text-inkLight' : 'bg-emerald-100 text-emerald-600'}`}>
-                              {t.type === 'EMAIL' ? <Mail className="h-4 w-4"/> : <MessageSquare className="h-4 w-4"/>}
+                    
+                    <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                      {templates.filter(t => t.type === selectedChannel).length > 0 ? (
+                        templates.filter(t => t.type === selectedChannel).map(t => (
+                          <button 
+                            key={t.id}
+                            onClick={() => handlePreviewTemplate(t)}
+                            className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/40 text-left transition-all group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={`p-1.5 rounded-lg shrink-0 ${t.type === 'EMAIL' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                {t.type === 'EMAIL' ? <Mail className="h-3.5 w-3.5"/> : <MessageSquare className="h-3.5 w-3.5"/>}
+                              </div>
+                              <span className="font-bold text-xs text-slate-800 group-hover:text-emerald-700 truncate">{t.name}</span>
                             </div>
-                            <span className="font-bold text-ink text-sm group-hover:text-primary-hover truncate">{t.name}</span>
-                          </div>
-                          <span className="text-xs font-bold text-inkLight/70 group-hover:text-primary shrink-0 ml-2">Preview &rarr;</span>
-                        </button>
-                      )) : (
-                        <p className="text-sm text-inkLight italic p-4 text-center border rounded-xl border-dashed">No {selectedChannel.toLowerCase()} templates found.</p>
+                            <span className="text-[11px] font-bold text-slate-400 group-hover:text-emerald-700 shrink-0 ml-2">Preview &rarr;</span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-400 italic p-4 text-center border rounded-xl border-dashed">
+                          No {selectedChannel.toLowerCase()} templates available.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -406,29 +466,29 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
 
           {/* TAB: TIMELINE */}
           {activeTab === 'timeline' && (
-            <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-borderMuted/60 min-h-full min-w-0 overflow-hidden card-base">
-              <h3 className="text-sm font-bold text-ink flex items-center gap-2 mb-6">
-                <Calendar className="h-4 w-4 text-primary" /> Activity Timeline
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 min-h-full min-w-0">
+              <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-6 flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-emerald-600" /> Applicant Activity Log
               </h3>
               
-              <div className="relative border-l-2 border-borderMuted/40 ml-2 sm:ml-3 space-y-6 min-w-0">
+              <div className="relative border-l-2 border-slate-200 ml-3 space-y-6 min-w-0">
                 {data.timeline && data.timeline.length > 0 ? data.timeline.map((event) => (
-                  <div key={event.id} className="relative pl-5 sm:pl-6 min-w-0">
-                    <div className="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-white border-2 border-primary shadow-sm shadow-primary/10"></div>
-                    <div className="bg-white p-4 rounded-xl shadow-card border border-borderMuted/40 hover:shadow-card-hover transition-shadow duration-300 min-w-0 overflow-hidden card-base">
-                      <div className="flex justify-between items-center mb-2 gap-2 flex-wrap sm:flex-nowrap min-w-0">
-                        <div className="text-[10px] font-bold tracking-widest uppercase px-2 py-1 bg-borderMuted text-inkLight rounded-lg shrink-0">
+                  <div key={event.id} className="relative pl-6 min-w-0">
+                    <div className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-xs"></div>
+                    <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/70 min-w-0">
+                      <div className="flex justify-between items-center mb-2 gap-2 flex-wrap">
+                        <span className="text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 bg-white text-slate-700 rounded-md border border-slate-200">
                           {event.action_type.replace(/_/g, ' ')}
-                        </div>
-                        <div className="text-xs text-inkLight/70 font-medium shrink-0">{formatDate(event.created_at)}</div>
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium">{formatDate(event.created_at)}</span>
                       </div>
-                      <div className="text-sm text-ink whitespace-pre-wrap leading-relaxed break-words [overflow-wrap:anywhere] min-w-0 overflow-hidden">
+                      <div className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed break-words">
                         {formatTimelineDescription(event.description)}
                       </div>
                     </div>
                   </div>
                 )) : (
-                  <div className="text-sm text-inkLight/70 italic pl-4">No activity recorded yet.</div>
+                  <div className="text-xs text-slate-400 italic pl-4">No activity recorded yet for this applicant.</div>
                 )}
               </div>
             </div>
@@ -448,3 +508,4 @@ export default function EnquiryDetailsModal({ enquiryId, onClose, onUpdate }) {
     </div>
   );
 }
+

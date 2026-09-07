@@ -153,7 +153,7 @@ export default function FranchiseDashboard() {
   const conversions = enquiries.filter(e => ['APPROVED', 'COMPLETED'].includes(e.status)).length;
 
   return (
-    <div className="flex flex-col gap-4 flex-1 relative">
+    <div className="flex flex-col gap-5 flex-1 relative">
       
       {/* Click-away overlay for popovers */}
       {(openStatusPopoverId || openActionMenuId) && (
@@ -167,40 +167,44 @@ export default function FranchiseDashboard() {
       )}
       
       {/* Due Tasks Alert Banner */}
-      {/* Due Tasks Alert Banner */}
       {(dueTasks.length > 0 && !isAlertDismissed) && (
         <div 
           style={{ 
             flexShrink: 0, 
             width: '100%', 
             boxSizing: 'border-box',
-            backgroundColor: 'rgba(224, 26, 34, 0.06)',
-            border: '1px solid rgba(224, 26, 34, 0.15)',
+            backgroundColor: 'rgba(224, 26, 34, 0.05)',
+            border: '1.5px solid rgba(224, 26, 34, 0.2)',
             display: 'flex',
             alignItems: 'center',
-            padding: '16px',
+            padding: '16px 20px',
             gap: '16px',
-            borderRadius: '16px',
-            position: 'relative'
+            borderRadius: '18px',
+            position: 'relative',
+            boxShadow: '0 4px 16px rgba(224, 26, 34, 0.08)'
           }}
-          className="shrink-0 shadow-sm anim-slide-up"
+          className="shrink-0 anim-slide-up"
         >
           <div 
             style={{ 
-              backgroundColor: 'rgba(224, 26, 34, 0.12)',
-              padding: '10px',
-              borderRadius: '12px',
+              background: 'linear-gradient(135deg, rgba(224, 26, 34, 0.15), rgba(224, 26, 34, 0.08))',
+              padding: '12px',
+              borderRadius: '14px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}
           >
-            <BellRing style={{ width: '20px', height: '20px', color: '#e01a22' }} className="animate-bounce" />
+            <BellRing style={{ width: '22px', height: '22px', color: '#e01a22' }} className="animate-bounce" />
           </div>
-          <div className="flex-1">
-            <h4 style={{ color: '#c1151c', margin: 0 }} className="font-bold text-sm">Action Required: Pending Follow-ups</h4>
-            <p style={{ color: 'rgba(193, 21, 28, 0.8)', margin: '2px 0 0 0' }} className="text-xs">
-              You have {dueTasks.length} scheduled follow-up{dueTasks.length !== 1 ? 's' : ''} currently due for: <span className="font-bold">{dueTasks.map(t => t.enquiries?.name || 'Unknown').join(', ')}</span>.
+          <div className="flex-1 min-w-0 pr-8">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h4 style={{ color: '#c1151c', margin: 0, fontSize: '14px', fontWeight: '800' }}>Action Required: Pending Follow-ups</h4>
+              <span style={{ background: '#e01a22', color: '#fff', fontSize: '10px', fontWeight: '800', padding: '1px 7px', borderRadius: '50px' }}>Urgent</span>
+            </div>
+            <p style={{ color: '#475569', margin: '3px 0 0 0', fontSize: '12.5px', lineHeight: 1.4 }}>
+              You have <strong style={{ color: '#0b1120' }}>{dueTasks.length} scheduled follow-up{dueTasks.length !== 1 ? 's' : ''}</strong> currently due for: <span style={{ fontWeight: '700', color: '#0b1120' }}>{dueTasks.map(t => t.enquiries?.name || 'Unknown').join(', ')}</span>.
             </p>
           </div>
           <button 
@@ -210,38 +214,40 @@ export default function FranchiseDashboard() {
               color: '#ffffff',
               border: 'none',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(224, 26, 34, 0.15)',
-              padding: '10px 18px',
+              boxShadow: '0 4px 14px rgba(224, 26, 34, 0.3)',
+              padding: '10px 20px',
               borderRadius: '12px',
-              fontSize: '12px',
-              fontWeight: 'bold',
+              fontSize: '13px',
+              fontWeight: '800',
               lineHeight: 1,
               whiteSpace: 'nowrap',
-              marginRight: '24px',
-              transition: 'all 0.2s'
+              marginRight: '20px',
+              flexShrink: 0
             }}
-            className="active:scale-95 btn-press"
+            className="btn-press"
           >
-            Review Now
+            Review Now &rarr;
           </button>
           
           <button 
             onClick={dismissAlert}
             style={{ 
-              color: 'rgba(224, 26, 34, 0.6)', 
+              color: '#94a3b8', 
               cursor: 'pointer',
               position: 'absolute',
-              top: '8px',
-              right: '8px',
+              top: '10px',
+              right: '10px',
               padding: '6px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               border: 'none',
               background: 'transparent',
-              borderRadius: '8px'
+              borderRadius: '8px',
+              transition: 'all 0.15s'
             }}
-            className="hover:text-[#e01a22] hover:bg-red-50 transition-all duration-200"
+            onMouseEnter={e => { e.currentTarget.style.color = '#e01a22'; e.currentTarget.style.background = 'rgba(224,26,34,0.08)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
             title="Dismiss Alert"
           >
             <X style={{ width: '16px', height: '16px' }} />
@@ -252,71 +258,91 @@ export default function FranchiseDashboard() {
       {/* Metrics Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 shrink-0">
         {[
-          { label: 'Total Leads', value: totalEnquiries, trend: `${totalEnquiries} total inquiries`, trendColor: '#3b82f6', iconBg: '#eff6ff', iconColor: '#3b82f6', Icon: Users },
-          { label: 'Chat Leads', value: chatLeads, trend: totalEnquiries > 0 ? `${Math.round((chatLeads / totalEnquiries) * 100)}% of total` : '0%', trendColor: '#a855f7', iconBg: '#faf5ff', iconColor: '#a855f7', Icon: MessageSquare },
-          { label: 'Form Leads', value: formLeads, trend: totalEnquiries > 0 ? `${Math.round((formLeads / totalEnquiries) * 100)}% of total` : '0%', trendColor: '#22c55e', iconBg: '#f0fdf4', iconColor: '#22c55e', Icon: FileText },
-          { label: 'Conversions', value: conversions, trend: totalEnquiries > 0 ? `${Math.round((conversions / totalEnquiries) * 100)}% conv. rate` : '0%', trendColor: '#f97316', iconBg: '#fff7ed', iconColor: '#f97316', Icon: DollarSign },
+          { label: 'Total Inquiries', value: totalEnquiries, trend: `${totalEnquiries} all-time leads`, trendColor: '#2563eb', iconBg: '#eff6ff', iconColor: '#2563eb', Icon: Users },
+          { label: 'AI Chatbot Leads', value: chatLeads, trend: totalEnquiries > 0 ? `${Math.round((chatLeads / totalEnquiries) * 100)}% of total volume` : '0%', trendColor: '#7c3aed', iconBg: '#f5f3ff', iconColor: '#7c3aed', Icon: MessageSquare },
+          { label: 'Direct Form Leads', value: formLeads, trend: totalEnquiries > 0 ? `${Math.round((formLeads / totalEnquiries) * 100)}% of total volume` : '0%', trendColor: '#059669', iconBg: '#ecfdf5', iconColor: '#059669', Icon: FileText },
+          { label: 'Converted Franchisees', value: conversions, trend: totalEnquiries > 0 ? `${Math.round((conversions / totalEnquiries) * 100)}% conversion rate` : '0%', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: DollarSign },
         ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
-          <div key={label} style={{ background: '#ffffff', border: '1px solid #eaeaea', borderRadius: '16px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)', transition: 'box-shadow 0.2s ease' }} className="card-base card-lift">
+          <div key={label} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '18px', padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(0,0,0,0.03)' }} className="card-base card-lift">
             <div>
-              <p style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>{label}</p>
-              <p style={{ fontSize: '28px', fontWeight: '900', color: '#0b1120', lineHeight: 1, marginBottom: '8px' }}>{value}</p>
-              <p style={{ fontSize: '11px', fontWeight: '700', color: trendColor, display: 'flex', alignItems: 'center', gap: '4px' }}>{trend}</p>
+              <p style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' }}>{label}</p>
+              <p style={{ fontSize: '30px', fontWeight: '900', color: '#0b1120', lineHeight: 1, marginBottom: '8px', letterSpacing: '-0.03em' }}>{value}</p>
+              <p style={{ fontSize: '11.5px', fontWeight: '700', color: trendColor, display: 'flex', alignItems: 'center', gap: '4px' }}>{trend}</p>
             </div>
-            <div style={{ background: iconBg, color: iconColor, padding: '14px', borderRadius: '14px', flexShrink: 0 }}>
-              <Icon style={{ width: '22px', height: '22px' }} />
+            <div style={{ background: iconBg, color: iconColor, padding: '14px', borderRadius: '16px', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <Icon style={{ width: '24px', height: '24px' }} />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Charts toggle + Charts */}
+      {/* Charts toggle + Visual Charts Section */}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button 
           onClick={() => setShowCharts(!showCharts)}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', border: '1.5px solid #e2e8f0', color: '#1e293b', fontWeight: '700', fontSize: '13px', padding: '8px 18px', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s ease' }}
-          className="hover:border-blue-500 hover:text-blue-600"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: showCharts ? '#0b1120' : '#ffffff',
+            color: showCharts ? '#ffffff' : '#1e293b',
+            border: '1.5px solid #e2e8f0',
+            fontWeight: '700', fontSize: '13px',
+            padding: '9px 18px', borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            cursor: 'pointer', transition: 'all 0.2s ease'
+          }}
+          className="btn-press hover:border-slate-400"
         >
-          <BarChart3 style={{ width: '16px', height: '16px', color: '#3b82f6' }} />
-          {showCharts ? 'Hide Visual Charts' : 'View Analytics & Charts'}
+          <BarChart3 style={{ width: '16px', height: '16px', color: showCharts ? '#ffffff' : '#3b82f6' }} />
+          <span>{showCharts ? 'Hide Analytics Charts' : 'View Analytics & Trends'}</span>
         </button>
       </div>
 
       {showCharts && <AnalyticsCharts enquiries={enquiries} />}
 
-      <div style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #eaeaea', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '400px' }}>
+      {/* Main Leads Table Container */}
+      <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.03)', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '420px' }}>
         
-        {/* Filter Bar */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid #eaeaea', background: '#ffffff', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', flexShrink: 0, flexWrap: 'wrap' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+        {/* Filter & Search Bar */}
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', background: '#ffffff', display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px', flexShrink: 0, flexWrap: 'wrap' }}>
+          
+          <div style={{ position: 'relative', flex: 1, minWidth: '220px' }}>
             <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#94a3b8' }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search leads by name, phone, city..."
-              style={{ width: '100%', paddingLeft: '42px', paddingRight: '16px', paddingTop: '10px', paddingBottom: '10px', border: '1.5px solid #e2e8f0', borderRadius: '50px', fontSize: '13px', fontWeight: '500', color: '#1e293b', background: '#f8f9fa', outline: 'none', transition: 'all 0.2s ease', boxShadow: 'none' }}
+              placeholder="Search by applicant name, phone, city..."
+              style={{ width: '100%', paddingLeft: '42px', paddingRight: searchQuery ? '36px' : '16px', paddingTop: '10px', paddingBottom: '10px', border: '1.5px solid #e2e8f0', borderRadius: '12px', fontSize: '13.5px', fontWeight: '500', color: '#0f172a', background: '#f8fafc', outline: 'none', transition: 'all 0.2s ease' }}
               onFocus={e => { e.target.style.borderColor = '#e01a22'; e.target.style.background = '#fff'; e.target.style.boxShadow = '0 0 0 3px rgba(224,26,34,0.08)'; }}
-              onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8f9fa'; e.target.style.boxShadow = 'none'; }}
+              onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.background = '#f8fafc'; e.target.style.boxShadow = 'none'; }}
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '2px' }}
+              >
+                <X style={{ width: '14px', height: '14px' }} />
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <button
               onClick={() => setShowFilterModal(true)}
               style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '9px 16px', borderRadius: '50px', fontSize: '12px', fontWeight: '700',
-                border: statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL' ? '1.5px solid #bfdbfe' : '1.5px solid #e2e8f0',
-                background: statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL' ? '#eff6ff' : '#f8f9fa',
-                color: statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL' ? '#1d4ed8' : '#475569',
+                display: 'flex', alignItems: 'center', gap: '7px',
+                padding: '9px 18px', borderRadius: '12px', fontSize: '13px', fontWeight: '700',
+                border: (statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL') ? '1.5px solid #bfdbfe' : '1.5px solid #e2e8f0',
+                background: (statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL') ? '#eff6ff' : '#f8fafc',
+                color: (statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL') ? '#1d4ed8' : '#334155',
                 cursor: 'pointer', transition: 'all 0.2s ease'
               }}
+              className="btn-press"
             >
-              <Filter style={{ width: '14px', height: '14px', color: '#3b82f6' }} />
+              <Filter style={{ width: '15px', height: '15px', color: '#2563eb' }} />
               <span>Filters</span>
               {(statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL') && (
-                <span className="h-5 w-5 bg-blue-600 text-white rounded-full text-[10px] font-extrabold flex items-center justify-center shadow-sm">
+                <span style={{ width: '18px', height: '18px', background: '#2563eb', color: '#fff', borderRadius: '50%', fontSize: '10.5px', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {[statusFilter !== 'ALL', sourceFilter !== 'ALL', dateFilter !== 'ALL'].filter(Boolean).length}
                 </span>
               )}
@@ -325,21 +351,23 @@ export default function FranchiseDashboard() {
             {(statusFilter !== 'ALL' || sourceFilter !== 'ALL' || dateFilter !== 'ALL' || searchQuery !== '') && (
               <button
                 onClick={resetFilters}
-                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '9px 14px', borderRadius: '50px', fontSize: '12px', fontWeight: '700', color: '#e01a22', background: 'rgba(224,26,34,0.05)', border: '1.5px solid rgba(224,26,34,0.15)', cursor: 'pointer', transition: 'all 0.2s ease', flexShrink: 0 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '9px 14px', borderRadius: '12px', fontSize: '12.5px', fontWeight: '700', color: '#e01a22', background: 'rgba(224,26,34,0.06)', border: '1.5px solid rgba(224,26,34,0.18)', cursor: 'pointer', transition: 'all 0.2s ease', flexShrink: 0 }}
+                className="btn-press"
               >
-                <RotateCcw style={{ width: '13px', height: '13px' }} /> Reset
+                <RotateCcw style={{ width: '13px', height: '13px' }} />
+                <span>Reset</span>
               </button>
             )}
           </div>
         </div>
 
         {/* MOBILE CARD VIEW (< md) */}
-        <div className="md:hidden flex-1 overflow-y-auto pb-32 px-2 pt-2 space-y-2.5">
+        <div className="md:hidden flex-1 overflow-y-auto pb-32 px-3 pt-3 space-y-3">
           {filteredEnquiries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-inkLight/60">
-              <Users className="h-12 w-12 mb-3 opacity-20" />
-              <p className="text-base font-bold text-inkLight">No franchise enquiries found.</p>
-              <p className="text-xs text-inkLight/60 mt-1">Try resetting filters or searching another keyword.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Users className="h-12 w-12 mb-3 text-slate-300" />
+              <p className="text-base font-bold text-slate-800">No franchise enquiries found.</p>
+              <p className="text-xs text-slate-500 mt-1">Try resetting filters or searching another keyword.</p>
             </div>
           ) : (
             filteredEnquiries.map(enquiry => (
@@ -347,12 +375,12 @@ export default function FranchiseDashboard() {
                 key={enquiry.id}
                 className="bg-white rounded-2xl border border-borderMuted/60 shadow-card relative active:bg-surface/60 transition-all duration-200 card-base"
               >
-                <div className="p-3.5 flex items-center gap-3">
+                <div className="p-4 flex items-center gap-3">
                   <div
                     className="flex-1 flex items-center gap-3 cursor-pointer min-w-0"
                     onClick={() => setSelectedEnquiryId(enquiry.id)}
                   >
-                    <div className="h-12 w-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-extrabold text-lg shrink-0 border border-blue-200/60 shadow-xs">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 text-blue-700 flex items-center justify-center font-black text-lg shrink-0 border border-blue-200/60 shadow-xs">
                       {enquiry.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -376,7 +404,7 @@ export default function FranchiseDashboard() {
                         setOpenStatusPopoverId(openStatusPopoverId === enquiry.id ? null : enquiry.id);
                         setOpenActionMenuId(null);
                       }}
-                      className={`inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full font-bold border shadow-xs transition-transform active:scale-95 ${getStatusColor(enquiry.status)}`}
+                      className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs rounded-full font-bold border shadow-xs transition-transform active:scale-95 ${getStatusColor(enquiry.status)}`}
                     >
                       {enquiry.status.replace(/_/g, ' ')}
                       <ChevronDown className={`h-3.5 w-3.5 transition-transform ${openStatusPopoverId === enquiry.id ? 'rotate-180' : ''}`} />
@@ -408,15 +436,15 @@ export default function FranchiseDashboard() {
                   </div>
                 </div>
 
-                <div className="px-3.5 pb-3 flex items-center justify-between border-t border-borderMuted pt-2.5">
+                <div className="px-4 pb-3 flex items-center justify-between border-t border-borderMuted/60 pt-2.5">
                   <div className="flex items-center gap-2">
                     {enquiry.source === 'CHAT' ? (
-                      <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2.5 py-0.5 rounded-md text-xs font-bold border border-green-200">
-                        <Bot className="h-3.5 w-3.5" /> Chat
+                      <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-green-200">
+                        <Bot className="h-3.5 w-3.5" /> Chatbot
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-md text-xs font-bold border border-blue-200">
-                        <FileText className="h-3.5 w-3.5" /> Form
+                      <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-200">
+                        <FileText className="h-3.5 w-3.5" /> Website Form
                       </span>
                     )}
                     <span className="text-xs font-medium text-inkLight/70 flex items-center gap-1">
@@ -457,21 +485,27 @@ export default function FranchiseDashboard() {
             <div className="fixed inset-0 z-[45]" onClick={() => setOpenActionMenuId(null)} />
           )}
           <table className="w-full text-left text-sm text-inkLight">
-            <thead style={{ background: '#f8f9fa', borderBottom: '1px solid #eaeaea' }}>
+            <thead style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 10 }}>
               <tr>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>Date</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Applicant</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contact</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Location</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Source</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Next Action</th>
-                <th style={{ padding: '12px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Actions</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>Date</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Applicant</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contact Info</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Location</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Source</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Next Action</th>
+                <th style={{ padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-borderMuted/40">
               {filteredEnquiries.length === 0 ? (
-                <tr><td colSpan="7" className="text-center py-8 text-inkLight/60 italic">No franchise enquiries yet.</td></tr>
+                <tr>
+                  <td colSpan="8" className="text-center py-16">
+                    <Users className="h-12 w-12 mx-auto mb-3 text-slate-300" />
+                    <p className="text-base font-bold text-slate-800">No franchise leads found matching your filters.</p>
+                    <p className="text-xs text-slate-500 mt-1">Try resetting your filters or search keywords.</p>
+                  </td>
+                </tr>
               ) : (
                 filteredEnquiries.map(enquiry => (
                   <LeadTableRow
@@ -554,7 +588,7 @@ export default function FranchiseDashboard() {
             <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-elevated border border-borderMuted/40 relative anim-scale-in">
               <div className="flex items-center justify-between pb-4 border-b border-borderMuted mb-5">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                  <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
                     <Filter className="h-5 w-5" />
                   </div>
                   <div>
@@ -626,15 +660,15 @@ export default function FranchiseDashboard() {
                   <div className="flex flex-wrap gap-2">
                     {[
                       { id: 'ALL', label: 'All Sources' },
-                      { id: 'CHAT', label: 'AI Chatbot' },
-                      { id: 'FORM', label: 'Enquiry Form' }
+                      { id: 'CHAT', label: '🤖 AI Chatbot' },
+                      { id: 'FORM', label: '📝 Website Form' }
                     ].map(opt => (
                       <button
                         key={opt.id}
                         onClick={() => setSourceFilter(opt.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
                           sourceFilter === opt.id
-                            ? 'bg-navy border-navy text-white shadow-xs'
+                            ? 'bg-navy border-navy text-white shadow-sm'
                             : 'bg-surface border-borderMuted text-inkLight hover:bg-borderMuted'
                         }`}
                       >
@@ -656,9 +690,9 @@ export default function FranchiseDashboard() {
                       <button
                         key={opt.id}
                         onClick={() => setDateFilter(opt.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
                           dateFilter === opt.id
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
                             : 'bg-surface border-borderMuted text-inkLight hover:bg-borderMuted'
                         }`}
                       >
@@ -678,7 +712,7 @@ export default function FranchiseDashboard() {
                 </button>
                 <button
                   onClick={() => setShowFilterModal(false)}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors"
+                  className="admin-btn-primary"
                 >
                   Apply Filters
                 </button>
@@ -690,3 +724,4 @@ export default function FranchiseDashboard() {
     </div>
   );
 }
+

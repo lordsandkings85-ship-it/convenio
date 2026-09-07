@@ -1,50 +1,66 @@
 import React from 'react';
-import { X, CalendarClock, MessageCircleQuestion } from 'lucide-react';
+import { X, CalendarClock, MessageCircleQuestion, ArrowRight } from 'lucide-react';
 
 export default function FollowUpChoiceModal({ enquiry, onClose, onSelectSetReminder, onSelectAskCustomer }) {
   return (
-    <div className="fixed inset-0 bg-navy/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-elevated anim-scale-in border border-borderMuted/40">
-        <div className="flex items-center justify-between p-4 border-b border-borderMuted/60 bg-surface/60">
-          <h2 className="text-lg font-bold text-navy">Follow-up Action</h2>
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+          <h2 className="text-base font-extrabold text-slate-900">Choose Follow-up Method</h2>
           <button 
             onClick={onClose}
-            className="p-2 text-inkLight/60 hover:text-inkLight hover:bg-surface rounded-full transition-all duration-200"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="p-6">
-          <p className="text-sm text-inkLight mb-6 text-center font-medium">
-            How would you like to handle the follow-up for <strong className="text-navy">{enquiry?.name}</strong>?
+          <p className="text-xs text-slate-500 mb-5 font-medium">
+            How would you like to handle the follow-up for <strong className="text-slate-900">{enquiry?.name}</strong>?
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <button
               onClick={onSelectSetReminder}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-borderMuted/60 hover:border-blue-500 hover:bg-blue-50/60 transition-all duration-300 group text-left card-base"
+              className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all group text-left card-lift"
             >
-              <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-sm shadow-blue-500/10">
-                <CalendarClock className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
+                  <CalendarClock className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-xs group-hover:text-blue-700">Set Reminder Now</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">I already know the specific date & time to call.</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-navy group-hover:text-blue-700 transition-colors duration-300">Set Reminder Now</h3>
-                <p className="text-xs text-inkLight mt-1 font-medium">I already know the date and time to call them back.</p>
-              </div>
+              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-all group-hover:translate-x-1" />
             </button>
 
             <button
               onClick={onSelectAskCustomer}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-borderMuted/60 hover:border-emerald-500 hover:bg-emerald-50/60 transition-all duration-300 group text-left card-base"
+              className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all group text-left card-lift"
             >
-              <div className="bg-emerald-100 p-3 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shadow-sm shadow-emerald-500/10">
-                <MessageCircleQuestion className="w-6 h-6 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
+                  <MessageCircleQuestion className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-xs group-hover:text-emerald-700">Ask Applicant via WhatsApp</h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Send a quick message inquiring their availability.</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-navy group-hover:text-emerald-700 transition-colors duration-300">Ask Customer via Message</h3>
-                <p className="text-xs text-inkLight mt-1 font-medium">Send an automated message asking when to reach them.</p>
-              </div>
+              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 transition-all group-hover:translate-x-1" />
+            </button>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button 
+              onClick={onClose}
+              className="admin-btn-outline px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
+            >
+              Cancel
             </button>
           </div>
         </div>
@@ -52,3 +68,4 @@ export default function FollowUpChoiceModal({ enquiry, onClose, onSelectSetRemin
     </div>
   );
 }
+
