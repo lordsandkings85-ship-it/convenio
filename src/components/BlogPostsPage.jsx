@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './BlogPostsPage.css';
 import { Plus, Save, Trash2, Edit2, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { getBlogPosts, saveBlogPost, deleteBlogPost } from '../lib/api';
@@ -106,19 +107,19 @@ export default function BlogPostsPage() {
   const publishedCount = posts.filter(p => p.status === 'PUBLISHED').length;
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto w-full">
+    <div className="flex flex-col gap-5 w-full">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <Newspaper className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Blog & Articles CMS</h1>
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm" style={{ padding: '18px 24px' }}>
+        <div className="flex items-center gap-3.5">
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
+            <Newspaper className="w-5 h-5" />
+          </span>
+          <div>
+            <h1 className="admin-page-title m-0 leading-tight">Blog Posts</h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium m-0 mt-0.5 leading-normal">
+              Write, optimize, and publish SEO content to drive franchise organic discovery.
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Write, optimize, and publish SEO content to drive franchise organic discovery.
-          </p>
         </div>
         
         {!isEditing && (
@@ -135,6 +136,28 @@ export default function BlogPostsPage() {
           </div>
         )}
       </div>
+
+      {!isEditing && (
+        <div className="admin-metrics-grid shrink-0">
+          {[
+            { label: 'Total Articles', value: posts.length, trend: 'SEO organic content', trendColor: '#2563eb', iconBg: '#eff6ff', iconColor: '#2563eb', Icon: Newspaper },
+            { label: 'Published Live', value: publishedCount, trend: posts.length > 0 ? `${Math.round((publishedCount / posts.length) * 100)}% live online` : '0%', trendColor: '#059669', iconBg: '#ecfdf5', iconColor: '#059669', Icon: CheckCircle2 },
+            { label: 'Draft Content', value: posts.filter(p => p.status === 'DRAFT' || !p.status).length, trend: 'Work-in-progress', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: Edit2 },
+            { label: 'Featured Media', value: posts.filter(p => p.cover_image).length, trend: `${posts.filter(p => p.cover_image).length} with cover`, trendColor: '#7c3aed', iconBg: '#f5f3ff', iconColor: '#7c3aed', Icon: ImageIcon },
+          ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
+            <div key={label} className="admin-metric-card card-base card-lift">
+              <div className="admin-metric-info">
+                <p className="admin-metric-label">{label}</p>
+                <p className="admin-metric-value">{value}</p>
+                <p className="admin-metric-trend" style={{ color: trendColor }}>{trend}</p>
+              </div>
+              <div className="admin-metric-icon-box" style={{ background: iconBg, color: iconColor }}>
+                <Icon style={{ width: '22px', height: '22px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {!isEditing ? (
         <>

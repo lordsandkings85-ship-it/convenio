@@ -16,121 +16,151 @@ export default function LeadActionMenu({
 }) {
   return (
     <div
-      className="absolute right-0 mt-2 w-60 rounded-2xl bg-white shadow-2xl border border-borderMuted/60 py-2 z-50 anim-scale-in"
-      style={{ boxShadow: '0 20px 40px -10px rgba(0,0,0,0.18)' }}
+      className="admin-popover-menu"
+      style={{ minWidth: '260px', right: '0', top: '100%', marginTop: '8px' }}
     >
       {actionMenuMode === 'main' ? (
-        <>
-          <div className="px-3 py-1.5 mb-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-            Quick Actions
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {/* Header pill */}
+          <div className="admin-popover-header">
+            <span className="admin-popover-header-title">Quick Actions</span>
+            <span className="admin-popover-header-name" title={enquiry.name}>
+              {enquiry.name}
+            </span>
           </div>
 
+          {/* Action 1: View Full Details */}
           <button
             onClick={() => {
               onViewDetails(enquiry.id);
               onClose();
             }}
-            className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 hover:bg-slate-50 flex items-center justify-between font-bold transition-colors group"
+            className="admin-popover-action-item"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <Eye className="h-3.5 w-3.5" />
+            <div className="admin-popover-action-left">
+              <div className="admin-popover-action-icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                <Eye style={{ width: '16px', height: '16px' }} />
               </div>
-              <span>View Full Details</span>
+              <div>
+                <p className="admin-popover-action-title">View Full Details</p>
+                <p className="admin-popover-action-desc">Profile, notes & timeline</p>
+              </div>
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ChevronRight style={{ width: '15px', height: '15px' }} className="admin-popover-action-arrow" />
           </button>
 
+          {/* Action 2: Change Status */}
           <button
             onClick={() => {
               setActionMenuMode('status');
               setStatusSearchQuery('');
             }}
-            className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 hover:bg-slate-50 flex items-center justify-between font-bold transition-colors group"
+            className="admin-popover-action-item"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                <RefreshCcw className="h-3.5 w-3.5" />
+            <div className="admin-popover-action-left">
+              <div className="admin-popover-action-icon" style={{ background: '#fff7ed', color: '#ea580c' }}>
+                <RefreshCcw style={{ width: '16px', height: '16px' }} />
               </div>
-              <span>Change Status</span>
+              <div>
+                <p className="admin-popover-action-title">Change Status</p>
+                <p className="admin-popover-action-desc">Advance pipeline stage</p>
+              </div>
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ChevronRight style={{ width: '15px', height: '15px' }} className="admin-popover-action-arrow" />
           </button>
 
-          {(enquiry.status === 'CALL_LATER' || enquiry.status === 'NO_RESPONSE') && (
-            <button
-              onClick={() => {
-                onManageFollowUp(enquiry);
-                onClose();
-              }}
-              className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 hover:bg-blue-50 hover:text-blue-700 flex items-center justify-between font-bold transition-colors group"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                  <CalendarClock className="h-3.5 w-3.5" />
-                </div>
-                <span>Manage Follow-up</span>
+          {/* Action 3: Manage Follow-up */}
+          <button
+            onClick={() => {
+              onManageFollowUp(enquiry);
+              onClose();
+            }}
+            className="admin-popover-action-item"
+          >
+            <div className="admin-popover-action-left">
+              <div className="admin-popover-action-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                <CalendarClock style={{ width: '16px', height: '16px' }} />
               </div>
-              <ChevronRight className="h-3.5 w-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-          )}
+              <div>
+                <p className="admin-popover-action-title">Manage Follow-up</p>
+                <p className="admin-popover-action-desc">Schedule call & task</p>
+              </div>
+            </div>
+            <ChevronRight style={{ width: '15px', height: '15px' }} className="admin-popover-action-arrow" />
+          </button>
 
-          <div className="h-px bg-slate-100 my-1.5 mx-2"></div>
+          {/* Divider */}
+          <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0' }} />
 
+          {/* Action 4: Delete Lead */}
           <button
             onClick={() => {
               onDeleteLead(enquiry);
               onClose();
             }}
-            className="w-full text-left px-3.5 py-2.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2.5 font-bold transition-colors rounded-b-xl"
+            className="admin-popover-action-item delete"
           >
-            <div className="p-1.5 rounded-lg bg-red-100 text-red-600">
-              <Trash2 className="h-3.5 w-3.5" />
+            <div className="admin-popover-action-left">
+              <div className="admin-popover-action-icon" style={{ background: '#fef2f2', color: '#dc2626' }}>
+                <Trash2 style={{ width: '16px', height: '16px' }} />
+              </div>
+              <div>
+                <p className="admin-popover-action-title" style={{ color: '#dc2626' }}>Delete Lead</p>
+                <p className="admin-popover-action-desc" style={{ color: '#ef4444' }}>Remove from pipeline</p>
+              </div>
             </div>
-            <span>Delete Lead</span>
+            <ChevronRight style={{ width: '15px', height: '15px' }} className="admin-popover-action-arrow" />
           </button>
-        </>
+        </div>
       ) : (
-        <div className="flex flex-col max-h-[320px]">
-          <div className="px-3 py-2 border-b border-slate-100 bg-white">
+        <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '340px' }}>
+          <div style={{ padding: '8px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', borderRadius: '10px 10px 0 0', marginBottom: '6px' }}>
             <button
               onClick={() => setActionMenuMode('main')}
-              className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 font-bold mb-2 transition-colors cursor-pointer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: '800', color: '#475569', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '4px 10px', cursor: 'pointer', marginBottom: '8px' }}
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to Actions
+              <ArrowLeft style={{ width: '13px', height: '13px' }} /> Back to Actions
             </button>
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div style={{ position: 'relative' }}>
+              <Search style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', width: '13px', height: '13px', color: '#94a3b8' }} />
               <input
                 type="text"
                 autoFocus
-                placeholder="Search status..."
+                placeholder="Search pipeline status..."
                 value={statusSearchQuery}
                 onChange={e => setStatusSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-red-500 bg-slate-50 font-medium"
+                style={{ width: '100%', paddingLeft: '30px', paddingRight: '10px', paddingTop: '6px', paddingBottom: '6px', fontSize: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', outline: 'none', background: '#ffffff', boxSizing: 'border-box' }}
               />
             </div>
           </div>
-          <div className="overflow-y-auto px-1.5 py-1.5 admin-scroll max-h-56">
-            {statuses.filter(s => s.replace(/_/g, ' ').toLowerCase().includes(statusSearchQuery.toLowerCase())).map(status => (
-              <button
-                key={status}
-                onClick={() => {
-                  onStatusChange(enquiry.id, status);
-                  onClose();
-                }}
-                className={`w-full text-left px-3 py-2 text-xs font-bold rounded-xl flex justify-between items-center transition-all ${
-                  enquiry.status === status ? 'bg-red-50 text-red-700 font-black' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <span>{status.replace(/_/g, ' ')}</span>
-                {enquiry.status === status && <CheckCircle2 className="h-3.5 w-3.5 text-red-600" />}
-              </button>
-            ))}
+          <div className="admin-scroll" style={{ overflowY: 'auto', maxHeight: '220px', padding: '2px 4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            {statuses.filter(s => s.replace(/_/g, ' ').toLowerCase().includes(statusSearchQuery.toLowerCase())).map(status => {
+              const isSelected = enquiry.status === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => {
+                    onStatusChange(enquiry.id, status);
+                    onClose();
+                  }}
+                  style={{
+                    width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '12px', fontWeight: '800',
+                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    cursor: 'pointer', border: '1px solid transparent',
+                    background: isSelected ? '#fef2f2' : 'transparent',
+                    color: isSelected ? '#b91c1c' : '#1e293b',
+                    borderColor: isSelected ? '#fecaca' : 'transparent',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{status.replace(/_/g, ' ')}</span>
+                  {isSelected && <CheckCircle2 style={{ width: '14px', height: '14px', color: '#e01a22' }} />}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
     </div>
   );
 }
-

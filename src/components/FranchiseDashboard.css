@@ -1,0 +1,408 @@
+/* ==========================================================================
+   FranchiseDashboard.css - Dedicated Stylesheet for Master Franchise Dashboard
+   ========================================================================== */
+
+.dashboard-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+/* Header Banner */
+.dashboard-header-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* Alert Banner */
+.dashboard-alert-banner {
+  background: linear-gradient(135deg, #fff7f7 0%, #ffffff 45%, #fff5f5 100%);
+  border: 1px solid rgba(224, 26, 34, 0.2);
+  border-left: 4px solid #e01a22;
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 16px -2px rgba(224, 26, 34, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.dashboard-alert-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-alert-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 1px solid rgba(224, 26, 34, 0.25);
+  color: #e01a22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(224, 26, 34, 0.12);
+}
+
+.dashboard-alert-bell {
+  width: 20px;
+  height: 20px;
+  color: #e01a22;
+}
+
+.dashboard-alert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-alert-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 3px;
+}
+
+.dashboard-alert-badge {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #b91c1c;
+  text-transform: uppercase;
+  background: #fee2e2;
+  border: 1px solid rgba(224, 26, 34, 0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dashboard-alert-title {
+  color: #0f172a;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.dashboard-alert-desc {
+  color: #475569;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.dashboard-alert-count {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.dashboard-alert-leads {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.dashboard-alert-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dashboard-alert-btn {
+  background: linear-gradient(135deg, #e01a22 0%, #c1151c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(224, 26, 34, 0.28);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.dashboard-alert-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(224, 26, 34, 0.38);
+  background: linear-gradient(135deg, #c1151c 0%, #991b1b 100%);
+}
+
+.dashboard-alert-btn:active {
+  transform: translateY(0);
+}
+
+.dashboard-alert-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dashboard-alert-close:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+  .dashboard-alert-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+  }
+  .dashboard-alert-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .dashboard-alert-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Quick Action Command Grid */
+.dashboard-quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-quick-action-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  text-align: left;
+}
+
+.dashboard-quick-action-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+}
+
+.dashboard-quick-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Feed and Data Table Container */
+.dashboard-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.dashboard-table-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── Table Popovers (Status Suggester & Action Menu) ─────────────────────── */
+.admin-popover-menu {
+  position: absolute;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  z-index: 75;
+  box-sizing: border-box;
+  animation: adminScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-popover-header {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-popover-header-title {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin: 0;
+}
+
+.admin-popover-header-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
+}
+
+.admin-popover-status-item {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.admin-popover-status-item:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  transform: translateX(2px);
+}
+
+.admin-popover-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.admin-popover-action-item {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  text-align: left;
+  gap: 10px;
+}
+
+.admin-popover-action-item:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.admin-popover-action-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-popover-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.admin-popover-action-item:hover .admin-popover-action-icon {
+  transform: scale(1.06);
+}
+
+.admin-popover-action-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.admin-popover-action-desc {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 2px 0 0 0;
+  line-height: 1.3;
+}
+
+.admin-popover-action-arrow {
+  color: #cbd5e1;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.admin-popover-action-item:hover .admin-popover-action-arrow {
+  color: #0f172a;
+  transform: translateX(2px);
+}
+
+.admin-popover-action-item.delete {
+  margin-top: 4px;
+}
+.admin-popover-action-item.delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+.admin-popover-action-item.delete:hover .admin-popover-action-arrow {
+  color: #dc2626;
+}
+

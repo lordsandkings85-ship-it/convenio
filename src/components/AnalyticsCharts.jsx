@@ -1,6 +1,22 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { TrendingUp, PieChart as PieIcon } from 'lucide-react';
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const item = payload[0].payload;
+    return (
+      <div className="bg-white border border-borderMuted rounded-2xl px-3.5 py-3 shadow-card">
+        <p className="text-[11px] font-black text-slate-500 uppercase tracking-wider">{item.date || label}</p>
+        <p className="text-[15px] font-black text-navy mt-0.5 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+          <span>{payload[0].value} {payload[0].value === 1 ? 'New Lead' : 'New Leads'}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function AnalyticsCharts({ enquiries = [] }) {
   const safeEnquiries = Array.isArray(enquiries) ? enquiries : [];
@@ -54,40 +70,40 @@ export default function AnalyticsCharts({ enquiries = [] }) {
     ];
   }, [safeEnquiries]);
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const item = payload[0].payload;
-      return (
-        <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '10px 14px', borderRadius: '14px', boxShadow: '0 10px 25px -4px rgba(0,0,0,0.12)' }}>
-          <p style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.date || label}</p>
-          <p style={{ fontSize: '15px', fontWeight: '900', color: '#0b1120', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#e01a22' }} />
-            <span>{payload[0].value} {payload[0].value === 1 ? 'New Lead' : 'New Leads'}</span>
+  if (safeEnquiries.length === 0) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 shrink-0 anim-fade-up">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-dashed border-slate-200 p-8 sm:p-10 flex flex-col items-center justify-center text-center gap-3 card-base">
+          <div className="w-14 h-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shadow-inner">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-black text-navy">No analytics to show yet</h3>
+          <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
+            Once franchise inquiries start flowing in, their daily trend and channel distribution will appear here in real time.
           </p>
         </div>
-      );
-    }
-    return null;
-  };
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 shrink-0 anim-fade-up">
       {/* 7-Day Lead Volume Area Chart */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-borderMuted/60 p-5 sm:p-6 card-base card-lift">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="lg:col-span-2 bg-white rounded-2xl shadow-card border border-slate-200/70 p-5 sm:p-6 card-base card-lift">
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0b1120', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <TrendingUp style={{ width: '18px', height: '18px', color: '#e01a22' }} />
+            <h3 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
+              <TrendingUp className="w-[18px] h-[18px] text-primary" />
               <span>Lead Acquisition Trend</span>
             </h3>
-            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Daily new franchise inquiries over the past 7 days</p>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Daily new franchise inquiries over the past 7 days</p>
           </div>
-          <span style={{ fontSize: '11px', fontWeight: '800', background: '#eff6ff', color: '#1d4ed8', padding: '4px 12px', borderRadius: '50px', border: '1px solid #dbeafe' }}>
+          <span className="text-[11px] font-extrabold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200 whitespace-nowrap">
             Past 7 Days
           </span>
         </div>
 
-        <div className="h-60 sm:h-64">
+        <div className="h-60 sm:h-64" role="img" aria-label="Area chart of new franchise leads over the past 7 days">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={lineData} margin={{ top: 10, right: 15, left: -20, bottom: 5 }}>
               <defs>
@@ -116,16 +132,16 @@ export default function AnalyticsCharts({ enquiries = [] }) {
       </div>
 
       {/* Leads By Source Breakdown Donut Chart */}
-      <div className="bg-white rounded-2xl shadow-sm border border-borderMuted/60 p-5 sm:p-6 flex flex-col min-h-[280px] card-base card-lift">
-        <div style={{ marginBottom: '12px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0b1120', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PieIcon style={{ width: '18px', height: '18px', color: '#3b82f6' }} />
+      <div className="bg-white rounded-2xl shadow-card border border-slate-200/70 p-5 sm:p-6 flex flex-col min-h-[280px] card-base card-lift">
+        <div className="mb-3">
+          <h3 className="text-[15px] font-extrabold text-navy flex items-center gap-2">
+            <PieIcon className="w-[18px] h-[18px] text-blue-600" />
             <span>Channel Distribution</span>
           </h3>
-          <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>Where incoming applicant leads originate</p>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">Where incoming applicant leads originate</p>
         </div>
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center" role="img" aria-label="Donut chart of lead distribution by acquisition channel">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

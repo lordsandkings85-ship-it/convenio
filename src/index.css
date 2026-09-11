@@ -115,17 +115,30 @@ a:active {
   box-sizing: border-box;
 }
 
+/* Zero every admin heading's margins (spacing must stay identical to before),
+   but apply the font reset only to headings WITHOUT a class: this file is
+   unlayered, so these rules beat Tailwind's layered utilities — scoping the
+   font reset to bare headings lets classed headings keep their intended
+   Tailwind typography (size/weight) instead of collapsing to 16px/400. */
 .admin-layout h1,
 .admin-layout h2,
 .admin-layout h3,
 .admin-layout h4,
 .admin-layout h5,
 .admin-layout h6 {
+  margin: 0;
+}
+
+.admin-layout h1:not([class]),
+.admin-layout h2:not([class]),
+.admin-layout h3:not([class]),
+.admin-layout h4:not([class]),
+.admin-layout h5:not([class]),
+.admin-layout h6:not([class]) {
   font-size: inherit;
   font-weight: inherit;
   letter-spacing: inherit;
   line-height: inherit;
-  margin: 0;
 }
 
 .container {

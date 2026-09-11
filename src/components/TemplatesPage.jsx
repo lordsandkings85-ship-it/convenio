@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './TemplatesPage.css';
 import { Mail, MessageSquare, Plus, Save, Trash2, Edit2, FileText, X, Sparkles, Tag, ExternalLink, Info } from 'lucide-react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -67,19 +68,19 @@ export default function TemplatesPage() {
   const filteredTemplates = templates.filter(t => t.type === activeTab);
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto w-full">
+    <div className="flex flex-col gap-5 w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <Sparkles className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Communication Templates</h1>
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm" style={{ padding: '18px 24px' }}>
+        <div className="flex items-center gap-3.5">
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
+            <Sparkles className="w-5 h-5" />
+          </span>
+          <div>
+            <h1 className="admin-page-title m-0 leading-tight">Templates</h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium m-0 mt-0.5 leading-normal">
+              Standardized Email & WhatsApp messaging formats with automatic variable personalization.
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Standardized Email & WhatsApp messaging formats with automatic variable personalization.
-          </p>
         </div>
         
         {!isEditing && (
@@ -94,6 +95,28 @@ export default function TemplatesPage() {
           </button>
         )}
       </div>
+
+      {!isEditing && (
+        <div className="admin-metrics-grid shrink-0">
+          {[
+            { label: 'Total Templates', value: templates.length, trend: 'Standardized messaging', trendColor: '#2563eb', iconBg: '#eff6ff', iconColor: '#2563eb', Icon: FileText },
+            { label: 'Email Templates', value: emailCount, trend: templates.length > 0 ? `${Math.round((emailCount / templates.length) * 100)}% of library` : '0%', trendColor: '#7c3aed', iconBg: '#f5f3ff', iconColor: '#7c3aed', Icon: Mail },
+            { label: 'WhatsApp Templates', value: whatsappCount, trend: templates.length > 0 ? `${Math.round((whatsappCount / templates.length) * 100)}% of library` : '0%', trendColor: '#059669', iconBg: '#ecfdf5', iconColor: '#059669', Icon: MessageSquare },
+            { label: 'Automated Triggers', value: templates.filter(t => t.is_system || t.isSystem || t.status_trigger).length, trend: 'Stage auto-drafts', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: Sparkles },
+          ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
+            <div key={label} className="admin-metric-card card-base card-lift">
+              <div className="admin-metric-info">
+                <p className="admin-metric-label">{label}</p>
+                <p className="admin-metric-value">{value}</p>
+                <p className="admin-metric-trend" style={{ color: trendColor }}>{trend}</p>
+              </div>
+              <div className="admin-metric-icon-box" style={{ background: iconBg, color: iconColor }}>
+                <Icon style={{ width: '22px', height: '22px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {!isEditing ? (
         <>
@@ -255,13 +278,13 @@ export default function TemplatesPage() {
               </div>
               
               {/* Dynamic Variables Pill Bar */}
-              <div className="flex flex-wrap gap-1.5 mb-3 p-2 bg-slate-50 rounded-xl border border-slate-200/60">
+              <div className="flex items-center gap-1.5 mb-3 p-2 bg-slate-50 rounded-xl border border-slate-200/60 overflow-x-auto admin-scroll">
                 {['[Name]', '[Location]', '[Investment_Capacity]', '[Admin_Name]', '[Date]'].map(tag => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => handleInsertTag(tag)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 px-2.5 py-1 rounded-lg transition-all shadow-2xs"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 px-2.5 py-1.5 rounded-lg transition-all shadow-2xs shrink-0 cursor-pointer"
                   >
                     <Tag className="w-3 h-3 text-emerald-600" />
                     <span>{tag}</span>
@@ -270,12 +293,11 @@ export default function TemplatesPage() {
               </div>
 
               {editingTemplate.type === 'EMAIL' ? (
-                <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                <div className="admin-quill-wrapper">
                   <ReactQuill 
                     theme="snow" 
                     value={editingTemplate.body} 
                     onChange={(content) => setEditingTemplate({...editingTemplate, body: content})}
-                    className="bg-white min-h-[160px]"
                   />
                 </div>
               ) : (
@@ -285,7 +307,7 @@ export default function TemplatesPage() {
                   placeholder="Hi [Name],&#10;&#10;Thank you for showing interest in Convenio Mart Franchise opportunities in [Location]..."
                   value={editingTemplate.body}
                   onChange={(e) => setEditingTemplate({...editingTemplate, body: e.target.value})}
-                  className="w-full border border-slate-200 rounded-xl p-3.5 outline-none focus:border-emerald-500 transition-all font-mono text-xs text-slate-800 shadow-sm leading-relaxed"
+                  className="w-full border border-slate-200 rounded-xl p-3.5 outline-none focus:border-emerald-500 transition-all font-mono text-xs text-slate-800 shadow-sm leading-relaxed min-h-[160px]"
                 />
               )}
             </div>
@@ -309,17 +331,17 @@ export default function TemplatesPage() {
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 mt-4 pt-5 border-t border-slate-100">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-4 pt-5 border-t border-slate-100">
               <button 
                 type="button"
                 onClick={() => { setIsEditing(false); setEditingTemplate(null); }}
-                className="admin-btn-outline px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider"
+                className="admin-btn-outline w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                className="admin-btn-primary inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm"
+                className="admin-btn-primary w-full sm:w-auto"
               >
                 <Save className="h-4 w-4" /> Save Template
               </button>

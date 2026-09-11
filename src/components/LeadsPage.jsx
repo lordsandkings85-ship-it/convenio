@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import './LeadsPage.css';
 import { getEnquiries, createEnquiry } from '../lib/api';
-import { Plus, Search, Filter, Calendar, Phone, Mail, User, CheckCircle2, Flame, Snowflake, X, RotateCcw, MapPin, Sparkles, Building } from 'lucide-react';
+
+import { Plus, Search, Filter, Calendar, Phone, Mail, User, CheckCircle2, Flame, Snowflake, X, RotateCcw, MapPin, Sparkles, Building, Users } from 'lucide-react';
 import EnquiryDetailsModal from './EnquiryDetailsModal';
 
 const PIPELINE_STAGES = [
@@ -122,65 +124,55 @@ export default function LeadsPage({ highlightedLeadId }) {
 
   const totalLeads = enquiries.length;
   const hotLeads = enquiries.filter(e => calculateLeadScore(e.status, e.created_at) >= 70).length;
+  const activeLeads = enquiries.filter(e => ['ASSIGNED', 'FIRST_CALL', 'INTERESTED', 'CALL_LATER', 'DOCUMENTS_REQUESTED', 'DOCUMENTS_RECEIVED', 'READY_TO_PAY', 'PAYMENT_PENDING'].includes(e.status)).length;
   const wonLeads = enquiries.filter(e => ['PAYMENT_RECEIVED', 'APPROVED', 'COMPLETED', 'ONBOARDING', 'OPENED'].includes(e.status)).length;
 
   return (
-    <div className="flex flex-col gap-5 flex-1 min-h-0">
+    <div className="flex flex-col gap-5 flex-1 min-h-0 pb-4">
       
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div style={{ fontSize: '22px', fontWeight: '900', color: '#0b1120', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-            Leads Pipeline Management
-          </div>
-          <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '600', marginTop: '3px' }}>
-            Track, score, and nurture prospective franchise partners.
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm" style={{ padding: '18px 24px' }}>
+        <div className="flex items-center gap-3.5">
+          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
+            <Users className="w-5 h-5" />
+          </span>
+          <div>
+            <h1 className="admin-page-title m-0 leading-tight">Leads Pipeline</h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium m-0 mt-0.5 leading-normal">
+              Track, score, and nurture prospective franchise partners across every conversion stage.
+            </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => setShowAddModal(true)}
-            className="admin-btn-primary"
+            className="admin-btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
           >
             <Plus className="h-4 w-4" /> Add New Lead
           </button>
         </div>
       </div>
 
-      {/* Pipeline Quick KPI Chips */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-xs card-base">
-          <div>
-            <div className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Total Pipeline</div>
-            <div className="text-2xl font-black text-slate-900 mt-0.5">{totalLeads}</div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 font-bold text-xs">
-            100%
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-xs card-base">
-          <div>
-            <div className="text-[11px] font-extrabold text-amber-500 uppercase tracking-wider flex items-center gap-1">
-              <Flame className="w-3.5 h-3.5" /> High Potential
+      {/* Metrics Row */}
+      <div className="admin-metrics-grid shrink-0">
+        {[
+          { label: 'Total Pipeline', value: totalLeads, trend: 'All-time enquiries', trendColor: '#2563eb', iconBg: '#eff6ff', iconColor: '#2563eb', Icon: Users },
+          { label: 'High Potential', value: hotLeads, trend: 'Lead score ≥ 70', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: Flame },
+          { label: 'In Discussion', value: activeLeads, trend: totalLeads > 0 ? `${Math.round((activeLeads / totalLeads) * 100)}% active` : '0% active', trendColor: '#7c3aed', iconBg: '#f5f3ff', iconColor: '#7c3aed', Icon: Phone },
+          { label: 'Won / Approved', value: wonLeads, trend: totalLeads > 0 ? `${Math.round((wonLeads / totalLeads) * 100)}% won` : '0% won', trendColor: '#059669', iconBg: '#ecfdf5', iconColor: '#059669', Icon: CheckCircle2 },
+        ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
+          <div key={label} className="admin-metric-card card-base card-lift">
+            <div className="admin-metric-info">
+              <p className="admin-metric-label">{label}</p>
+              <p className="admin-metric-value">{value}</p>
+              <p className="admin-metric-trend" style={{ color: trendColor }}>{trend}</p>
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-0.5">{hotLeads}</div>
+            <div className="admin-metric-icon-box" style={{ background: iconBg, color: iconColor }}>
+              <Icon style={{ width: '22px', height: '22px' }} />
+            </div>
           </div>
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 font-bold text-xs">
-            Score ≥ 70
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between shadow-xs card-base">
-          <div>
-            <div className="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wider">Won / Approved</div>
-            <div className="text-2xl font-black text-slate-900 mt-0.5">{wonLeads}</div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs">
-            {totalLeads > 0 ? `${Math.round((wonLeads / totalLeads) * 100)}%` : '0%'}
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Main Container */}

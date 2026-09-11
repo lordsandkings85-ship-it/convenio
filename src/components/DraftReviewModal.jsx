@@ -182,30 +182,30 @@ export default function DraftReviewModal({ enquiry, newStatus, onClose, onSent }
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
           <div>
-            <h2 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
-              {selectedChannel === 'WHATSAPP' ? <MessageCircle className="h-5 w-5 text-emerald-600"/> : <Mail className="h-5 w-5 text-blue-600"/>} 
+            <h2 className="font-extrabold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+              {selectedChannel === 'WHATSAPP' ? <MessageCircle className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-emerald-600"/> : <Mail className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-blue-600"/>} 
               Review & Customize {selectedChannel === 'WHATSAPP' ? 'WhatsApp' : 'Email'} Draft
             </h2>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Edit before launching the application.</p>
+            <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">Edit before launching the application.</p>
           </div>
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all">
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 flex-1 flex flex-col gap-4 overflow-y-auto bg-white">
+        <div className="p-4 sm:p-6 flex-1 flex flex-col gap-4 overflow-y-auto bg-white admin-scroll">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Recipient {selectedChannel === 'WHATSAPP' ? '(Phone)' : '(Email)'}:
             </label>
-            <div className="text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold">
+            <div className="text-xs px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold truncate">
               {selectedChannel === 'WHATSAPP' 
                 ? (enquiry.phone || <span className="text-red-600">Missing Phone Number</span>)
                 : (enquiry.email ? `${enquiry.name} <${enquiry.email}>` : <span className="text-red-600">Missing Email Address</span>)
@@ -225,32 +225,32 @@ export default function DraftReviewModal({ enquiry, newStatus, onClose, onSent }
             </div>
           )}
 
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-[140px]">
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              {selectedChannel === 'WHATSAPP' ? 'WhatsApp Message Content:' : 'Email Body (Markdown/HTML Supported):'}
+              {selectedChannel === 'WHATSAPP' ? 'WhatsApp Message Content:' : 'Email Body:'}
             </label>
             <textarea 
               value={content}
               onChange={(e) => setContent(e.target.value)}
               disabled={isLoadingTemplate}
               placeholder={isLoadingTemplate ? "Loading template from database..." : ""}
-              rows={8}
-              className="w-full flex-1 min-h-[180px] text-xs font-mono p-3.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 focus:border-emerald-500 outline-none resize-y transition-all leading-relaxed"
+              rows={6}
+              className="w-full flex-1 min-h-[140px] text-xs font-mono p-3.5 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 focus:border-emerald-500 outline-none resize-y transition-all leading-relaxed"
             />
             {selectedChannel === 'WHATSAPP' && (
               <p className="text-[11px] text-slate-400 mt-1.5 font-medium">
-                Clicking "Send" will open a pre-filled WhatsApp Web / App chat with the applicant.
+                Clicking "Send" will open a pre-filled WhatsApp chat with the applicant.
               </p>
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 shrink-0">
           <button 
             onClick={() => setSelectedChannel(null)}
             disabled={isSending}
-            className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+            className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors text-left"
           >
             &larr; Switch Channel
           </button>
@@ -259,14 +259,14 @@ export default function DraftReviewModal({ enquiry, newStatus, onClose, onSent }
             <button 
               onClick={onClose}
               disabled={isSending}
-              className="admin-btn-outline px-4 py-2 text-xs font-bold uppercase tracking-wider"
+              className="admin-btn-outline flex-1 sm:flex-none px-4 py-2 text-xs font-bold uppercase tracking-wider"
             >
               Cancel
             </button>
             <button 
               onClick={handleSend}
               disabled={isSending}
-              className={`inline-flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white rounded-xl transition-all shadow-sm disabled:opacity-50 ${
+              className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white rounded-xl transition-all shadow-sm disabled:opacity-50 ${
                 selectedChannel === 'WHATSAPP' 
                   ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20' 
                   : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'

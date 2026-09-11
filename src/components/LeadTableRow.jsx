@@ -110,34 +110,55 @@ export default function LeadTableRow({
               setOpenStatusPopoverId(isStatusOpen ? null : enquiry.id);
               setOpenActionMenuId(null);
             }}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs rounded-full font-extrabold shadow-xs transition-all duration-150 active:scale-95 ${getStatusColor(enquiry.status)}`}
-            style={{ cursor: 'pointer' }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-full font-extrabold shadow-xs transition-all duration-150 active:scale-95"
+            style={{ 
+              cursor: 'pointer', 
+              borderWidth: '1px', 
+              borderStyle: 'solid',
+              ...getStatusColor(enquiry.status)
+            }}
           >
             <span>{enquiry.status.replace(/_/g, ' ')}</span>
             <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${isStatusOpen ? 'rotate-180' : ''}`} />
           </button>
           
           {isStatusOpen && (
-            <div className="absolute right-1/2 translate-x-1/2 mt-2 w-52 rounded-2xl bg-white shadow-2xl border border-borderMuted p-2.5 z-[60] anim-scale-in">
-              <div className="text-[10.5px] uppercase font-black text-inkLight/70 mb-2 px-2 text-left tracking-wider">Suggested Next Step</div>
+            <div 
+              className="admin-popover-menu"
+              style={{ minWidth: '220px', right: '50%', transform: 'translateX(50%)', top: '100%', marginTop: '8px' }}
+            >
+              <div className="admin-popover-header">
+                <span className="admin-popover-header-title">Suggested Next Step</span>
+              </div>
               {getNextStatusOptions(enquiry.status).length > 0 ? (
-                <div className="flex flex-col gap-1">
-                  {getNextStatusOptions(enquiry.status).map(opt => (
-                    <button
-                      key={opt}
-                      onClick={() => {
-                        onStatusChange(enquiry.id, opt);
-                        setOpenStatusPopoverId(null);
-                      }}
-                      className="w-full text-left px-3 py-2 text-xs font-bold text-ink hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors flex items-center justify-between group"
-                    >
-                      <span>{opt.replace(/_/g, ' ')}</span>
-                      <ArrowRight className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600" />
-                    </button>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {getNextStatusOptions(enquiry.status).map(opt => {
+                    const colorStyle = getStatusColor(opt);
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => {
+                          onStatusChange(enquiry.id, opt);
+                          setOpenStatusPopoverId(null);
+                        }}
+                        className="admin-popover-status-item"
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span 
+                            className="admin-popover-status-dot" 
+                            style={{ background: colorStyle.color || '#e01a22' }} 
+                          />
+                          <span style={{ color: '#0f172a' }}>{opt.replace(/_/g, ' ')}</span>
+                        </div>
+                        <ArrowRight style={{ width: '13px', height: '13px', color: '#64748b' }} />
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
-                <div className="px-2 py-2 text-xs text-inkLight italic text-left">No automated next step. Use 3-dots to change status.</div>
+                <div style={{ padding: '10px 12px', fontSize: '11.5px', color: '#94a3b8', fontStyle: 'italic', textAlign: 'left' }}>
+                  No automated next step.
+                </div>
               )}
             </div>
           )}

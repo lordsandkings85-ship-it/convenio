@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import './TopNav.css';
 import { Bell, Settings, LogOut, Clock, ChevronDown, CheckCircle2, User, AlertTriangle, Sparkles } from 'lucide-react';
 import { getEnquiries, getDueTasks } from '../lib/api';
 import { useIsMobile } from '../hooks/useWindowSize';
 
-export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
+export default function TopNav({ activeTab = 'dashboard', onLogout, onSettings, onNotificationClick }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifTab, setNotifTab] = useState('ALL'); // ALL, TASKS, LEADS
   const [newLeads, setNewLeads] = useState([]);
   const [dueTasks, setDueTasks] = useState([]);
   const isMobile = useIsMobile(1024);
+
+  const getTabLabel = (tab) => {
+    switch (tab) {
+      case 'dashboard': return 'Franchise Dashboard';
+      case 'leads': return 'Leads Pipeline';
+      case 'reports': return 'Reports & Analytics';
+      case 'templates': return 'Communication Templates';
+      case 'blog': return 'Blog Posts CMS';
+      default: return 'Franchise Dashboard';
+    }
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -59,27 +71,45 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
     <header
       className="admin-topnav"
       style={{
-        position: 'fixed', top: 0, right: 0, left: isMobile ? 0 : 240, height: '64px', zIndex: 35,
+        position: 'fixed', 
+        top: 0, 
+        right: 0, 
+        left: isMobile ? 0 : 240, 
+        height: isMobile ? '60px' : '64px', 
+        zIndex: 35,
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid #f1f5f9',
         boxShadow: '0 1px 6px rgba(0,0,0,0.03)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: isMobile ? '0 16px 0 60px' : '0 28px',
-        transition: 'left 0.3s ease',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        padding: isMobile ? '0 12px 0 58px' : '0 28px',
+        transition: 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        maxWidth: '100vw',
+        boxSizing: 'border-box'
       }}
     >
-      {/* Greeting */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: '900', color: '#0b1120', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>{getGreeting()}, Admin</span>
-          <span style={{ fontSize: '18px' }}>👋</span>
+      {/* Greeting & Active Page Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1, paddingRight: '8px' }}>
+        <div style={{ fontSize: isMobile ? '14px' : '17px', fontWeight: '900', color: '#0b1120', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{getGreeting()}{isMobile ? '' : ', Admin'}</span>
+          <span style={{ fontSize: isMobile ? '15px' : '17px', flexShrink: 0 }}>👋</span>
         </div>
+        {!isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#94a3b8', borderLeft: '1.5px solid #e2e8f0', paddingLeft: '12px', whiteSpace: 'nowrap' }}>
+            <span>Portal</span>
+            <span style={{ color: '#cbd5e1' }}>/</span>
+            <span style={{ color: '#e01a22', fontWeight: '800' }}>
+              {getTabLabel(activeTab)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
 
         {/* ── Bell notifications ── */}
         <div style={{ position: 'relative' }}>
@@ -113,11 +143,22 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
           {showNotifications && (
             <>
               <div style={{ position: 'fixed', inset: 0, zIndex: 65 }} onClick={() => setShowNotifications(false)} />
-              <div style={{
-                position: 'absolute', right: 0, top: 'calc(100% + 10px)', width: isMobile ? '300px' : '360px',
-                background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px',
-                boxShadow: '0 20px 40px -10px rgba(0,0,0,0.16)', zIndex: 70, overflow: 'hidden'
-              }} className="anim-scale-in">
+              <div 
+                style={{
+                  position: 'fixed',
+                  right: '12px',
+                  top: isMobile ? '64px' : '72px',
+                  width: 'calc(100vw - 24px)',
+                  maxWidth: '360px',
+                  background: '#ffffff', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: '20px',
+                  boxShadow: '0 20px 40px -10px rgba(0,0,0,0.18)', 
+                  zIndex: 70, 
+                  overflow: 'hidden'
+                }} 
+                className="anim-scale-in"
+              >
                 
                 {/* Header */}
                 <div style={{ padding: '14px 18px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -132,8 +173,8 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
                 <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', background: '#ffffff', padding: '4px' }}>
                   {[
                     { id: 'ALL', label: `All (${totalNotifs})` },
-                    { id: 'TASKS', label: `Due Tasks (${dueTasks.length})` },
-                    { id: 'LEADS', label: `New Leads (${newLeads.length})` },
+                    { id: 'TASKS', label: `Tasks (${dueTasks.length})` },
+                    { id: 'LEADS', label: `Leads (${newLeads.length})` },
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -218,12 +259,13 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
           onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
           onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
           title="Bot Settings"
+          aria-label="Bot Settings"
         >
           <Settings style={{ width: '18px', height: '18px' }} />
         </button>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 4px' }} />
+        <div style={{ width: '1px', height: '24px', background: '#e2e8f0', margin: '0 2px' }} />
 
         {/* ── Admin avatar + click-toggle logout dropdown ── */}
         <div style={{ position: 'relative' }}>
@@ -232,18 +274,19 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
           <button
             onClick={() => { setShowUserMenu(v => !v); setShowNotifications(false); }}
             style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '4px 10px 4px 4px', borderRadius: '12px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '4px 8px 4px 4px', borderRadius: '12px',
               background: showUserMenu ? '#f1f5f9' : '#f8fafc',
               border: '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.18s ease',
             }}
             onMouseEnter={e => { if (!showUserMenu) { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.borderColor = '#cbd5e1'; } }}
             onMouseLeave={e => { if (!showUserMenu) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#e2e8f0'; } }}
+            aria-label="User Account"
           >
-            <div style={{ width: '30px', height: '30px', borderRadius: '9px', background: 'linear-gradient(135deg, #e01a22 0%, #0b1120 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '13px', boxShadow: '0 2px 6px rgba(224,26,34,0.3)', flexShrink: 0 }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, #e01a22 0%, #0b1120 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '12px', boxShadow: '0 2px 6px rgba(224,26,34,0.3)', flexShrink: 0 }}>
               A
             </div>
-            <span className="admin-name-label" style={{ fontSize: '13px', fontWeight: '800', color: '#0b1120' }}>Admin</span>
+            {!isMobile && <span className="admin-name-label" style={{ fontSize: '13px', fontWeight: '800', color: '#0b1120' }}>Admin</span>}
             <ChevronDown style={{ width: '14px', height: '14px', color: '#94a3b8', transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
           </button>
 
@@ -254,7 +297,21 @@ export default function TopNav({ onLogout, onSettings, onNotificationClick }) {
 
           {/* Dropdown panel */}
           {showUserMenu && (
-            <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: '200px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.14)', padding: '6px', zIndex: 49 }} className="anim-scale-in">
+            <div 
+              style={{ 
+                position: 'absolute', 
+                right: 0, 
+                top: 'calc(100% + 8px)', 
+                width: 'min(220px, calc(100vw - 24px))', 
+                background: '#fff', 
+                border: '1px solid #e2e8f0', 
+                borderRadius: '16px', 
+                boxShadow: '0 12px 32px rgba(0,0,0,0.14)', 
+                padding: '6px', 
+                zIndex: 49 
+              }} 
+              className="anim-scale-in"
+            >
               <div style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9', marginBottom: '4px' }}>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: '#0b1120' }}>Convenio Admin</div>
                 <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', fontWeight: '600' }}>superuser@convenio.in</div>

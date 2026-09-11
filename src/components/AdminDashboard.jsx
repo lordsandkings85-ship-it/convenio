@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './AdminDashboard.css';
 import { useSearchParams } from 'react-router-dom';
 import { Settings, X } from 'lucide-react';
 import FranchiseDashboard from './FranchiseDashboard';
@@ -48,58 +49,81 @@ export default function AdminDashboard({ onLogout }) {
     setTimeout(() => setHighlightedLeadId(null), 2000);
   };
 
-return (
-    <div className="admin-layout" style={{ minHeight: '100vh', background: '#f8f9fa', display: 'flex' }}>
+  return (
+    <div className="admin-layout" style={{ minHeight: '100vh', background: '#f8f9fa', display: 'flex', width: '100%', overflowX: 'hidden' }}>
 
       {/* Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main content area — offset by sidebar width on desktop */}
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 0,
-        minHeight: '100vh',
-        /* Desktop: push right of fixed sidebar */
-        marginLeft: isMobile ? 0 : 240,
-        transition: 'margin-left 0.3s ease',
-      }} className="admin-main-content">
+      <div 
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+          minHeight: '100vh',
+          marginLeft: isMobile ? 0 : 240,
+          transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          width: isMobile ? '100%' : 'calc(100% - 240px)',
+          maxWidth: '100vw'
+        }} 
+        className="admin-main-content"
+      >
 
         {/* Sticky top nav */}
         <TopNav
+          activeTab={activeTab}
           onLogout={onLogout}
           onSettings={() => setShowSettingsModal(true)}
           onNotificationClick={handleNotificationClick}
         />
 
-        {/* Page content — padded below fixed topnav */}
-        <main style={{ flex: 1, padding: '24px', paddingTop: '84px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '24px', minWidth: 0, overflowX: 'hidden' }}>
-          {activeTab === 'dashboard'  && <FranchiseDashboard />}
-          {activeTab === 'leads'      && <LeadsPage highlightedLeadId={highlightedLeadId} />}
-          {activeTab === 'reports'    && <ReportsPage />}
-          {activeTab === 'templates'  && <TemplatesPage />}
-          {activeTab === 'blog'       && <BlogPostsPage />}
+        {/* Page content */}
+        <main 
+          style={{ 
+            flex: 1, 
+            padding: isMobile ? '16px 14px 48px' : '24px 28px 48px', 
+            paddingTop: isMobile ? '76px' : '88px', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: isMobile ? '16px' : '24px', 
+            minWidth: 0, 
+            maxWidth: '100%',
+            overflowX: 'hidden' 
+          }}
+        >
+          {activeTab === 'dashboard'  && <FranchiseDashboard onNavigateTab={setActiveTab} />}
+          {activeTab === 'leads'      && <LeadsPage highlightedLeadId={highlightedLeadId} onNavigateTab={setActiveTab} />}
+          {activeTab === 'reports'    && <ReportsPage onNavigateTab={setActiveTab} />}
+          {activeTab === 'templates'  && <TemplatesPage onNavigateTab={setActiveTab} />}
+          {activeTab === 'blog'       && <BlogPostsPage onNavigateTab={setActiveTab} />}
         </main>
       </div>
 
       {/* Settings Modal */}
       {showSettingsModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(11,17,32,0.6)', backdropFilter: 'blur(4px)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-          <div style={{ background: '#fff', borderRadius: '20px', maxWidth: '440px', width: '100%', padding: '28px', boxShadow: '0 20px 40px -12px rgba(0,0,0,0.15)', position: 'relative' }}>
+        <div className="admin-modal-backdrop" onClick={() => setShowSettingsModal(false)}>
+          <div 
+            className="admin-modal-card anim-scale-in" 
+            style={{ maxWidth: '440px', padding: '24px' }} 
+            onClick={e => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowSettingsModal(false)}
-              style={{ position: 'absolute', top: '16px', right: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}
+              className="admin-icon-btn"
+              style={{ position: 'absolute', top: '16px', right: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px' }}
+              aria-label="Close"
             >
               <X style={{ width: '18px', height: '18px', color: '#64748b' }} />
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ padding: '10px', background: 'rgba(224,26,34,0.1)', borderRadius: '12px' }}>
-                <Settings style={{ width: '22px', height: '22px', color: '#e01a22' }} />
+              <div style={{ padding: '10px', background: 'rgba(224,26,34,0.1)', borderRadius: '14px', color: '#e01a22' }}>
+                <Settings style={{ width: '22px', height: '22px' }} />
               </div>
               <div>
-                <div style={{ fontSize: '17px', fontWeight: '800', color: '#0b1120' }}>Chatbot Settings</div>
+                <div style={{ fontSize: '17px', fontWeight: '900', color: '#0b1120' }}>Chatbot Settings</div>
                 <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '500', marginTop: '2px' }}>Configure AI lead collection flow</div>
               </div>
             </div>
@@ -107,7 +131,7 @@ return (
             <div style={{ padding: '16px 0', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#0b1120', marginBottom: '4px' }}>Collect Budget Details</div>
+                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#0b1120', marginBottom: '4px' }}>Collect Budget Details</div>
                   <div style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
                     {collectBudget
                       ? 'Enabled: AI Bot will ask users for budget after name and location.'
@@ -115,6 +139,7 @@ return (
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleToggleBudgetSetting(!collectBudget)}
                   style={{
                     width: '44px', height: '24px', borderRadius: '12px', padding: '2px',
@@ -124,16 +149,19 @@ return (
                     border: 'none', cursor: 'pointer', flexShrink: 0,
                     transition: 'all 0.3s ease',
                   }}
+                  aria-label="Toggle budget collection"
                 >
                   <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }} />
                 </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
+                type="button"
                 onClick={() => setShowSettingsModal(false)}
-                style={{ padding: '10px 22px', background: 'linear-gradient(135deg, #0b1120, #1a2542)', color: '#fff', fontWeight: '700', fontSize: '13px', borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(11,17,32,0.2)' }}
+                className="admin-btn-primary"
+                style={{ width: '100%' }}
               >
                 Save & Close
               </button>

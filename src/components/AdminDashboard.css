@@ -1,0 +1,62 @@
+/* ==========================================================================
+   AdminDashboard.css - Master Admin Shell & Global Layout Container
+   ========================================================================== */
+
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.admin-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+.admin-main-content > main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Settings Modal Specifics */
+.admin-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.admin-settings-row:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.admin-settings-label {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #0b1120;
+}
+
+.admin-settings-desc {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 2px;
+}

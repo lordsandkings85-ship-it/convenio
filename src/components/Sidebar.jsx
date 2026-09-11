@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
+import './Sidebar.css';
 import { LayoutDashboard, Users, PieChart, MessageSquare, FileText, Database, Menu, X, ExternalLink } from 'lucide-react';
 import { useIsMobile } from '../hooks/useWindowSize';
 
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'leads',     label: 'Leads Pipeline', icon: Users },
-  { id: 'reports',   label: 'Reports & Analytics', icon: PieChart },
-  { id: 'templates', label: 'Templates', icon: MessageSquare },
-  { id: 'blog',      label: 'Blog Posts', icon: FileText },
+const NAV_SECTIONS = [
+  {
+    label: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Pipeline',
+    items: [
+      { id: 'leads',    label: 'Leads Pipeline', icon: Users },
+      { id: 'reports',  label: 'Reports & Analytics', icon: PieChart },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { id: 'templates', label: 'Templates', icon: MessageSquare },
+      { id: 'blog',      label: 'Blog Posts', icon: FileText },
+    ],
+  },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab }) {
@@ -35,36 +51,27 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </div>
       </div>
 
-      {/* Nav items */}
+      {/* Nav items — grouped by section */}
       <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <div style={{ padding: '0 10px 8px', fontSize: '10px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Navigation
-        </div>
-        {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-          const isActive = activeTab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => handleNav(id)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '11px',
-                padding: '11px 14px', width: '100%', borderRadius: '12px',
-                background: isActive ? 'linear-gradient(90deg, rgba(224,26,34,0.1) 0%, rgba(224,26,34,0.03) 100%)' : 'transparent',
-                boxShadow: isActive ? 'inset 3px 0 0 #e01a22' : 'inset 3px 0 0 transparent',
-                color: isActive ? '#c1151c' : '#475569',
-                fontWeight: isActive ? '800' : '600',
-                fontSize: '13.5px', cursor: 'pointer',
-                border: 'none', textAlign: 'left',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#0f172a'; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; } }}
-            >
-              <Icon style={{ width: '18px', height: '18px', flexShrink: 0, color: isActive ? '#e01a22' : '#64748b', transform: isActive ? 'scale(1.08)' : 'scale(1)', transition: 'all 0.2s' }} />
-              <span style={{ flex: 1 }}>{label}</span>
-            </button>
-          );
-        })}
+        {NAV_SECTIONS.map((section) => (
+          <div className="admin-nav-group" key={section.label}>
+            <div className="admin-nav-section">{section.label}</div>
+            {section.items.map(({ id, label, icon: Icon }) => {
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => handleNav(id)}
+                  className={`admin-nav-item${isActive ? ' is-active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className="admin-nav-icon" />
+                  <span style={{ flex: 1 }}>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Branding & quick link card */}
@@ -96,15 +103,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     <>
       {/* DESKTOP FIXED SIDEBAR */}
       {!isMobile && (
-        <aside style={{
-          position: 'fixed', top: 0, left: 0, bottom: 0,
-          width: '240px', zIndex: 40,
-          background: '#ffffff',
-          borderRight: '1px solid #f1f5f9',
-          boxShadow: '1px 0 12px rgba(0,0,0,0.03)',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto',
-        }}>
+        <aside className="admin-sidebar-panel">
           <SidebarContent />
         </aside>
       )}
@@ -113,13 +112,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       {isMobile && (
         <button
           onClick={() => setMobileOpen(true)}
-          style={{
-            position: 'fixed', top: '12px', left: '12px', zIndex: 50,
-            background: '#ffffff', border: '1.5px solid #e2e8f0',
-            borderRadius: '12px', padding: '9px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}
+          className="admin-hamburger-btn"
           aria-label="Open menu"
         >
           <Menu style={{ width: '20px', height: '20px', color: '#0b1120' }} />
@@ -133,19 +126,11 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(11,17,32,0.6)', backdropFilter: 'blur(4px)' }}
             onClick={() => setMobileOpen(false)}
           />
-          <aside style={{
-            position: 'fixed', top: 0, left: 0, bottom: 0,
-            width: '270px', zIndex: 70,
-            background: '#ffffff',
-            boxShadow: '8px 0 32px rgba(0,0,0,0.18)',
-            transform: 'translateX(0)',
-            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            display: 'flex', flexDirection: 'column',
-            overflowY: 'auto',
-          }}>
+          <aside className="admin-sidebar-drawer-panel">
             <button
               onClick={() => setMobileOpen(false)}
-              style={{ position: 'absolute', top: '14px', right: '14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '6px', cursor: 'pointer', zIndex: 1 }}
+              className="admin-sidebar-drawer-close"
+              aria-label="Close menu"
             >
               <X style={{ width: '16px', height: '16px', color: '#64748b' }} />
             </button>
@@ -156,4 +141,3 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     </>
   );
 }
-
