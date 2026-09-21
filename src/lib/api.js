@@ -143,6 +143,103 @@ export async function updateTaskStatus(taskId, status) {
   if (error) throw error;
 }
 
+async function callGroqAI(messages, defaultModel = 'openai/gpt-oss-120b') {
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY || '';
+  const models = [
+    import.meta.env.VITE_GROQ_MODEL || defaultModel,
+    'llama-3.3-70b-versatile',
+    'openai/gpt-oss-20b'
+  ];
+
+  for (const model of models) {
+    // 1. Direct Groq API
+    try {
+      const directRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_completion_tokens: 1024,
+          top_p: 1
+        })
+      });
+      if (directRes.ok) {
+        const text = await directRes.text();
+        if (text && !text.trim().startsWith('<')) {
+          const data = JSON.parse(text);
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content;
+          }
+        }
+      }
+    } catch (e) {
+      // Continue to next endpoint
+    }
+
+    // 2. PHP Proxy
+    try {
+      const phpRes = await fetch('/api/chat.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_completion_tokens: 1024,
+          top_p: 1
+        })
+      });
+      if (phpRes.ok) {
+        const text = await phpRes.text();
+        if (text && !text.trim().startsWith('<')) {
+          const data = JSON.parse(text);
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content;
+          }
+        }
+      }
+    } catch (e) {
+      // Continue to next endpoint
+    }
+
+    // 3. Serverless / Vite Dev Proxy
+    try {
+      const proxyRes = await fetch(`${API_BASE}/groq/openai/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+          max_completion_tokens: 1024,
+          top_p: 1
+        })
+      });
+      if (proxyRes.ok) {
+        const text = await proxyRes.text();
+        if (text && !text.trim().startsWith('<')) {
+          const data = JSON.parse(text);
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content;
+          }
+        }
+      }
+    } catch (e) {
+      // Continue
+    }
+  }
+
+  throw new Error('All AI completion endpoints failed');
+}
+
 /**
  * Generate email draft using Groq AI
  */
@@ -169,26 +266,9 @@ Write a congratulatory email welcoming them to the Convenio Mart family. Mention
   prompt += `\nKeep the email professional, enthusiastic, and concise (under 150 words). Do not include placeholder brackets like [Your Name], just sign off as 'Convenio Mart Franchise Team'. Use HTML formatting with <p> and <br> tags for paragraphs.`;
 
   try {
-    const response = await fetch(`${API_BASE}/groq/openai/v1/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 1,
-        max_completion_tokens: 2048,
-        top_p: 1,
-        reasoning_effort: 'medium'
-      })
-    });
-
-    if (!response.ok) throw new Error('Failed to generate draft from Groq');
-    const data = await response.json();
-    return data.choices[0].message.content;
+    return await callGroqAI([{ role: 'user', content: prompt }]);
   } catch (error) {
-    console.error(error);
+    console.error("Draft generation error:", error);
     throw error;
   }
 }
@@ -222,26 +302,9 @@ Write an enthusiastic WhatsApp message welcoming them to the Convenio Mart famil
   prompt += `\nKeep the message highly conversational, enthusiastic, and very concise (under 50 words). Use emojis. Do not include placeholder brackets, just sign off as 'Convenio Mart'. Do NOT use HTML formatting, use standard WhatsApp text formatting (like *bold*).`;
 
   try {
-    const response = await fetch(`${API_BASE}/groq/openai/v1/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 1,
-        max_completion_tokens: 2048,
-        top_p: 1,
-        reasoning_effort: 'medium'
-      })
-    });
-
-    if (!response.ok) return "";
-    const data = await response.json();
-    return data.choices[0].message.content;
+    return await callGroqAI([{ role: 'user', content: prompt }]);
   } catch (error) {
-    console.error(error);
+    console.error("WhatsApp generation error:", error);
     return "";
   }
 }
@@ -260,16 +323,38 @@ export async function saveCommunicationDraft(draftData) {
 }
 
 /**
- * Send Email via Resend
+ * Send Email via Resend / PHP Proxy
  */
 export async function sendEmail(to, subject, htmlContent) {
+  // 1. Try PHP Proxy
+  try {
+    const phpRes = await fetch('/api/send-email.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to,
+        subject,
+        html: htmlContent
+      })
+    });
+    if (phpRes.ok) {
+      const text = await phpRes.text();
+      if (!text.trim().startsWith('<')) {
+        return JSON.parse(text);
+      }
+    }
+  } catch (e) {
+    // Continue
+  }
+
+  // 2. Try Serverless / Dev Proxy
   const response = await fetch(`${API_BASE}/resend/emails`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'Convenio Mart <onboarding@resend.dev>', // Replace with verified domain in prod
+      from: 'Convenio Mart <onboarding@resend.dev>',
       to: [to],
       subject: subject,
       html: htmlContent
@@ -277,7 +362,7 @@ export async function sendEmail(to, subject, htmlContent) {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || 'Failed to send email');
   }
   return await response.json();
@@ -408,5 +493,30 @@ export async function deleteBlogPost(id) {
     .eq('id', id);
 
   if (error) throw error;
+}
+
+/**
+ * Upload an image (blog cover or inline content image) to Supabase Storage
+ * and return its public URL.
+ */
+export async function uploadBlogImage(file) {
+  const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+  const path = `blog/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { data, error } = await supabase.storage
+    .from('blog-images')
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type || `image/${ext}`
+    });
+
+  if (error) throw error;
+
+  const { data: urlData } = supabase.storage
+    .from('blog-images')
+    .getPublicUrl(data.path);
+
+  return urlData.publicUrl;
 }
 

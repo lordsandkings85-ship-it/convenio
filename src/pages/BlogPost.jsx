@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import SEO from '../components/SEO';
 import { ArrowLeft, ArrowRight, Calendar, User, Tag } from 'lucide-react';
 import { getBlogPostBySlug } from '../lib/api';
@@ -106,7 +108,9 @@ const BlogPost = () => {
           )}
 
           <div className="blog-post-content">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+              {post.content}
+            </ReactMarkdown>
           </div>
 
           <div className="blog-post-footer">

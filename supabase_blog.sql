@@ -39,3 +39,17 @@ CREATE TRIGGER update_blog_posts_modtime
 CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON public.blog_posts(slug);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON public.blog_posts(status);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_created_at ON public.blog_posts(created_at DESC);
+
+-- Blog Image Storage Bucket
+-- Public bucket where cover images and inline article images are uploaded from the CMS.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('blog-images', 'blog-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow public read access to blog images
+CREATE POLICY "Public read access to blog images" ON storage.objects
+    FOR SELECT TO public USING (bucket_id = 'blog-images');
+
+-- Allow authenticated uploads of blog images (add the app's service role / anon upload policy as needed)
+CREATE POLICY "Public upload access to blog images" ON storage.objects
+    FOR INSERT TO authenticated WITH CHECK (bucket_id = 'blog-images');

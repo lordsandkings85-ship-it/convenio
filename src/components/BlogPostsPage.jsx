@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './BlogPostsPage.css';
-import { Plus, Save, Trash2, Edit2, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2 } from 'lucide-react';
+import { Plus, Save, Trash2, Edit3, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2, Link2, Code, FileCheck, UploadCloud, ImagePlus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { getBlogPosts, saveBlogPost, deleteBlogPost } from '../lib/api';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import { getBlogPosts, saveBlogPost, deleteBlogPost, uploadBlogImage } from '../lib/api';
 import { useDialog } from './Dialog';
 
 const slugify = (text) => {
@@ -36,6 +38,11 @@ export default function BlogPostsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [isCoverUploading, setIsCoverUploading] = useState(false);
+  const [isContentUploading, setIsContentUploading] = useState(false);
+  const coverInputRef = useRef(null);
+  const contentInputRef = useRef(null);
+  const markdownRef = useRef(null);
   const { showToast, showConfirm } = useDialog();
 
   const loadPosts = async () => {
@@ -104,14 +111,60 @@ export default function BlogPostsPage() {
     setIsEditing(true);
   };
 
+  const handleCoverImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsCoverUploading(true);
+    try {
+      const url = await uploadBlogImage(file);
+      setEditingPost({ ...editingPost, cover_image: url });
+      showToast('Cover image uploaded successfully', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Cover image upload failed', 'error');
+    } finally {
+      setIsCoverUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleContentImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsContentUploading(true);
+    try {
+      const url = await uploadBlogImage(file);
+      const alt = file.name.replace(/\.[^.]+$/, '') || 'blog-image';
+      const snippet = `\n\n![${alt}](${url})\n`;
+      const el = markdownRef.current;
+      const current = editingPost.content || '';
+      let next;
+      if (el) {
+        const start = el.selectionStart ?? current.length;
+        const end = el.selectionEnd ?? current.length;
+        next = current.slice(0, start) + snippet + current.slice(end);
+      } else {
+        next = current.endsWith('\n') ? current + snippet.trimStart() : current + snippet;
+      }
+      setEditingPost({ ...editingPost, content: next });
+      showToast('Image uploaded and inserted into article', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Image upload failed', 'error');
+    } finally {
+      setIsContentUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const publishedCount = posts.filter(p => p.status === 'PUBLISHED').length;
 
   return (
-    <div className="flex flex-col gap-5 w-full">
+    <div className="flex flex-col gap-6 w-full">
       {/* Header Banner */}
-      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm" style={{ padding: '18px 24px' }}>
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs" style={{ padding: '18px 24px' }}>
         <div className="flex items-center gap-3.5">
-          <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
+          <span className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-inner">
             <Newspaper className="w-5 h-5" />
           </span>
           <div>
@@ -124,14 +177,14 @@ export default function BlogPostsPage() {
         
         {!isEditing && (
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex text-xs font-bold text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+            <span className="hidden sm:inline-flex text-xs font-bold text-slate-600 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200/80">
               <strong className="text-emerald-600 mr-1">{publishedCount}</strong> Published / {posts.length} Total
             </span>
             <button
               onClick={() => startEdit(null)}
-              className="admin-btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all"
+              className="admin-btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm transition-all cursor-pointer"
             >
-              <Plus className="h-4 w-4" /> New Post
+              <Plus className="h-4 w-4" /> New Article
             </button>
           </div>
         )}
@@ -142,7 +195,7 @@ export default function BlogPostsPage() {
           {[
             { label: 'Total Articles', value: posts.length, trend: 'SEO organic content', trendColor: '#2563eb', iconBg: '#eff6ff', iconColor: '#2563eb', Icon: Newspaper },
             { label: 'Published Live', value: publishedCount, trend: posts.length > 0 ? `${Math.round((publishedCount / posts.length) * 100)}% live online` : '0%', trendColor: '#059669', iconBg: '#ecfdf5', iconColor: '#059669', Icon: CheckCircle2 },
-            { label: 'Draft Content', value: posts.filter(p => p.status === 'DRAFT' || !p.status).length, trend: 'Work-in-progress', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: Edit2 },
+            { label: 'Draft Content', value: posts.filter(p => p.status === 'DRAFT' || !p.status).length, trend: 'Work-in-progress', trendColor: '#ea580c', iconBg: '#fff7ed', iconColor: '#ea580c', Icon: Edit3 },
             { label: 'Featured Media', value: posts.filter(p => p.cover_image).length, trend: `${posts.filter(p => p.cover_image).length} with cover`, trendColor: '#7c3aed', iconBg: '#f5f3ff', iconColor: '#7c3aed', Icon: ImageIcon },
           ].map(({ label, value, trend, trendColor, iconBg, iconColor, Icon }) => (
             <div key={label} className="admin-metric-card card-base card-lift">
@@ -169,16 +222,16 @@ export default function BlogPostsPage() {
               </div>
             </div>
           ) : posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="blog-posts-grid">
               {posts.map(post => (
-                <div key={post.id} className="bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group card-lift">
+                <div key={post.id} className="blog-post-card group">
                   {/* Cover Image */}
-                  <div className="h-44 bg-slate-100 relative overflow-hidden">
+                  <div className="blog-card-cover">
                     {post.cover_image ? (
                       <img
                         src={post.cover_image}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="blog-card-cover-img"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
@@ -190,11 +243,7 @@ export default function BlogPostsPage() {
                     
                     {/* Status Badge */}
                     <span
-                      className={`absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm backdrop-blur-md ${
-                        post.status === 'PUBLISHED'
-                          ? 'bg-emerald-500/90 text-white shadow-emerald-500/20'
-                          : 'bg-amber-500/90 text-white shadow-amber-500/20'
-                      }`}
+                      className={`blog-status-badge ${post.status === 'PUBLISHED' ? 'published' : 'draft'}`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                       {post.status === 'PUBLISHED' ? 'Published' : 'Draft'}
@@ -210,14 +259,14 @@ export default function BlogPostsPage() {
                       <div className="flex items-center gap-1 shrink-0">
                         <button 
                           onClick={() => startEdit(post)} 
-                          className="admin-icon-btn p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100" 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer" 
                           title="Edit Post"
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit3 className="h-4 w-4" />
                         </button>
                         <button 
                           onClick={() => handleDelete(post.id)} 
-                          className="admin-icon-btn p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50" 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" 
                           title="Delete Post"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -231,7 +280,7 @@ export default function BlogPostsPage() {
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mt-auto pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-[11.5px] font-semibold text-slate-400 mt-auto pt-3.5 border-t border-slate-100">
                       <span className="flex items-center gap-1.5 truncate max-w-[140px]">
                         <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                         <span className="truncate">{post.author || 'Editorial Team'}</span>
@@ -251,29 +300,43 @@ export default function BlogPostsPage() {
                 <Newspaper className="h-6 w-6" />
               </div>
               <p className="text-sm font-bold text-slate-700">No blog posts found</p>
-              <p className="text-xs text-slate-400 mt-1">Click "New Post" above to write your first franchise marketing article.</p>
+              <p className="text-xs text-slate-400 mt-1">Click "New Article" above to author your first franchise marketing post.</p>
             </div>
           )}
         </>
       ) : (
-        /* Blog Post Editor */
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200/80 p-6">
-          <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-            <div>
-              <h2 className="text-xl font-black text-slate-900">{editingPost.id ? 'Edit Blog Post' : 'Create New Article'}</h2>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">Author SEO-friendly articles formatted with rich markdown.</p>
+        /* Executive Blog Post Editor */
+        <div className="blog-editor-card">
+          <div className="blog-editor-header">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Newspaper className="w-5 h-5 text-emerald-600" />
+              </span>
+              <div>
+                <h2 className="blog-editor-title">
+                  {editingPost.id ? 'Edit Blog Post' : 'Create New Article'}
+                </h2>
+                <p className="blog-editor-subtext">
+                  Author SEO-friendly articles formatted with rich markdown.
+                </p>
+              </div>
             </div>
+            
             <button 
               onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }} 
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+              title="Close"
+              aria-label="Close"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSavePost} className="flex flex-col gap-5">
+          <form onSubmit={handleSavePost} className="flex flex-col gap-6">
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Article Headline / Title</label>
+              <label className="blog-form-label">
+                <span>Article Headline / Title</span>
+              </label>
               <input
                 type="text"
                 required
@@ -287,86 +350,138 @@ export default function BlogPostsPage() {
                     slug: editingPost.id ? editingPost.slug : slugify(title)
                   });
                 }}
-                className="w-full border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 transition-all font-bold text-sm text-slate-900 shadow-sm"
+                className="blog-form-input font-bold text-sm"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">URL Slug</label>
-                <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 px-3 shadow-sm focus-within:border-emerald-500 focus-within:bg-white transition-all">
-                  <span className="text-xs font-bold text-slate-400 select-none mr-1">/blog/</span>
+                <label className="blog-form-label">
+                  <span>URL Slug</span>
+                </label>
+                <div className="blog-slug-container">
+                  <span className="blog-slug-prefix">/blog/</span>
                   <input
                     type="text"
                     required
                     placeholder="mini-supermarket-franchise-2026"
                     value={editingPost.slug}
                     onChange={(e) => handleSlugChange(e.target.value)}
-                    className="w-full py-3 bg-transparent outline-none font-mono text-xs text-slate-800"
+                    className="blog-slug-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Author Name</label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <label className="blog-form-label">
+                  <span>Author Name</span>
+                </label>
+                <div className="blog-input-wrapper">
+                  <span className="blog-input-icon">
+                    <User size={16} />
+                  </span>
                   <input
                     type="text"
                     placeholder="e.g. Convenio Mart Franchise Team"
                     value={editingPost.author}
                     onChange={(e) => setEditingPost({ ...editingPost, author: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl p-3 pl-10 outline-none focus:border-emerald-500 transition-all font-semibold text-xs text-slate-800 shadow-sm"
+                    className="blog-form-input has-icon"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Short Excerpt / Meta Description</label>
+              <label className="blog-form-label">
+                <span>Short Excerpt / Meta Description</span>
+              </label>
               <textarea
                 rows={2}
                 placeholder="A compelling 1-2 sentence teaser shown on the blog index cards and search results."
                 value={editingPost.excerpt}
                 onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 transition-all font-medium text-xs text-slate-800 shadow-sm leading-relaxed"
+                className="blog-form-textarea"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Cover Image URL</label>
-              <div className="flex gap-4 items-center">
-                <div className="relative flex-1">
-                  <ImageIcon className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+              <label className="blog-form-label">
+                <span>Cover Image</span>
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="blog-input-wrapper flex-1">
+                  <span className="blog-input-icon">
+                    <ImageIcon size={16} />
+                  </span>
                   <input
                     type="url"
-                    placeholder="https://images.unsplash.com/photo-..."
+                    placeholder="https://images.unsplash.com/photo-... or upload below"
                     value={editingPost.cover_image}
                     onChange={(e) => setEditingPost({ ...editingPost, cover_image: e.target.value })}
-                    className="w-full border border-slate-200 rounded-xl p-3 pl-10 outline-none focus:border-emerald-500 transition-all font-medium text-xs text-slate-800 shadow-sm"
+                    className="blog-form-input has-icon"
                   />
                 </div>
-                {editingPost.cover_image && (
-                  <div className="w-16 h-11 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100">
-                    <img src={editingPost.cover_image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                  </div>
-                )}
+                <div className="flex items-center gap-3 shrink-0">
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleCoverImageUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={isCoverUploading}
+                    className="blog-upload-btn"
+                  >
+                    <UploadCloud className="h-4 w-4" />
+                    {isCoverUploading ? 'Uploading...' : 'Upload Image'}
+                  </button>
+                  {editingPost.cover_image && (
+                    <div className="w-16 h-11 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-100 shadow-xs">
+                      <img src={editingPost.cover_image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Article Body (Markdown Supported)
-                </label>
+              <div className="blog-markdown-toolbar">
+                <div className="blog-markdown-hints">
+                  <span className="text-[11.5px] font-bold text-slate-600 mr-1 flex items-center gap-1">
+                    <Code className="w-3.5 h-3.5 text-primary" /> Markdown Formatting:
+                  </span>
+                  <span className="blog-markdown-pill">## H2</span>
+                  <span className="blog-markdown-pill">### H3</span>
+                  <span className="blog-markdown-pill">**bold**</span>
+                  <span className="blog-markdown-pill">*italic*</span>
+                  <span className="blog-markdown-pill">- list</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => contentInputRef.current?.click()}
+                  disabled={isContentUploading}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0"
+                  title="Upload an image and insert it into the article"
+                >
+                  <ImagePlus className="h-3.5 w-3.5" />
+                  {isContentUploading ? 'Uploading...' : 'Insert Image'}
+                  <input
+                    ref={contentInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleContentImageUpload}
+                  />
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowPreview(!showPreview)}
-                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg border transition-all ${
-                    showPreview 
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                      : 'text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100'
-                  }`}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   {showPreview ? 'Switch to Markdown Editor' : 'Live Preview'}
@@ -374,57 +489,65 @@ export default function BlogPostsPage() {
               </div>
 
               {showPreview ? (
-                <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 prose max-w-none text-xs text-slate-800 leading-relaxed min-h-[300px]">
+                <div className="blog-preview-container prose max-w-none">
                   {editingPost.content ? (
-                    <ReactMarkdown>{editingPost.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                      {editingPost.content}
+                    </ReactMarkdown>
                   ) : (
-                    <p className="text-slate-400 italic">No content typed yet. Switch back to editor to begin.</p>
+                    <p className="text-slate-400 italic">No content written yet. Switch back to markdown editor to compose.</p>
                   )}
                 </div>
               ) : (
                 <textarea
+                  ref={markdownRef}
                   required
-                  rows={14}
-                  placeholder={'## Introduction\n\nConvenio Mart offers an exceptional franchise opportunity...\n\n### Key Benefits\n- High ROI\n- Complete supply chain support'}
+                  rows={12}
+                  placeholder={'## Introduction\n\nConvenio Mart offers an exceptional franchise opportunity...\n\n### Key Benefits\n- High ROI & 70% profit share\n- Complete supply chain & POS support\n- Captive customer base in gated apartments'}
                   value={editingPost.content}
                   onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
-                  className="w-full border border-slate-200 rounded-xl p-4 outline-none focus:border-emerald-500 transition-all font-mono text-xs text-slate-800 shadow-sm leading-relaxed"
+                  className="blog-markdown-textarea"
                 />
               )}
             </div>
 
-            {/* Publication Status & Action Buttons */}
+            {/* Publication Status Toggle & Actions */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-5 border-t border-slate-100">
-              <label className="flex items-center gap-3 cursor-pointer select-none">
-                <button
-                  type="button"
-                  onClick={() => setEditingPost({ ...editingPost, status: editingPost.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED' })}
-                  className={`w-12 h-6 rounded-full transition-colors flex items-center px-0.5 ${editingPost.status === 'PUBLISHED' ? 'bg-emerald-600 justify-end' : 'bg-slate-300 justify-start'}`}
+              <div 
+                className="blog-toggle-wrapper"
+                onClick={() => setEditingPost({ ...editingPost, status: editingPost.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED' })}
+              >
+                <div 
+                  className={`blog-toggle-track ${editingPost.status === 'PUBLISHED' ? 'is-published' : ''}`}
+                  role="switch"
+                  aria-checked={editingPost.status === 'PUBLISHED'}
                 >
-                  <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
-                </button>
-                <span className="text-xs font-bold text-slate-700">
+                  <div className="blog-toggle-thumb" />
+                </div>
+                <span className="blog-toggle-label">
                   {editingPost.status === 'PUBLISHED' ? (
-                    <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+                    <span className="text-emerald-700 font-extrabold flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" /> Published (Live on Website)
                     </span>
                   ) : (
-                    <span className="text-slate-500">Draft (Hidden from Public)</span>
+                    <span className="text-slate-500 font-semibold flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-slate-400" /> Draft (Hidden from Public)
+                    </span>
                   )}
                 </span>
-              </label>
+              </div>
 
               <div className="flex gap-3 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => { setIsEditing(false); setEditingPost(null); setShowPreview(false); }}
-                  className="admin-btn-outline flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider"
+                  className="admin-btn-outline flex-1 sm:flex-none cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="admin-btn-primary flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm"
+                  className="admin-btn-primary flex-1 sm:flex-none inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Save className="h-4 w-4" /> Save Article
                 </button>
