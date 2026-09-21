@@ -143,81 +143,98 @@ export default function ChatbotWidget() {
       const groqApiKey = import.meta.env.VITE_GROQ_API_KEY || '';
       const groqModel = import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b';
 
-      const sendChatRequest = async (modelName) => {
-        // 1. Try local dev proxy / Vercel proxy (/api/groq)
-        try {
-          const res = await fetch('/api/groq/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(groqApiKey ? { 'Authorization': `Bearer ${groqApiKey}` } : {})
-            },
-            body: JSON.stringify({
-              model: modelName,
-              messages: payloadMessages,
-              temperature: 0.7,
-              max_completion_tokens: 1024,
-              top_p: 1
-            })
-          });
-          if (res.ok) return res;
-        } catch (proxyErr) {
-          // Continue to next fallback
-        }
+      const fetchAIResponse = async (payload) => {
+        const modelsToTry = [
+          groqModel,
+          'llama-3.3-70b-versatile',
+          'openai/gpt-oss-20b',
+          'llama-3.1-8b-instant'
+        ];
 
-        // 2. Try direct Groq API
-        try {
-          const directRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${groqApiKey}`
-            },
-            body: JSON.stringify({
-              model: modelName,
-              messages: payloadMessages,
-              temperature: 0.7,
-              max_completion_tokens: 1024,
-              top_p: 1
-            })
-          });
-          if (directRes.ok) return directRes;
-        } catch (directErr) {
-          // Continue to next fallback
-        }
+        let lastError = null;
 
-        // 3. Try Hostinger / Apache PHP endpoint (/api/chat.php)
-        return await fetch('/api/chat.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: modelName,
-            messages: payloadMessages,
+        for (const model of modelsToTry) {
+          const bodyStr = JSON.stringify({
+            model,
+            messages: payload,
             temperature: 0.7,
             max_completion_tokens: 1024,
             top_p: 1
-          })
-        });
+          });
+
+          // 1. Direct Groq API (High Performance, natively supports CORS)
+          try {
+            const directRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${groqApiKey}`
+              },
+              body: bodyStr
+            });
+            if (directRes.ok) {
+              const text = await directRes.text();
+              if (text && !text.trim().startsWith('<')) {
+                const data = JSON.parse(text);
+                if (data.choices && data.choices[0]?.message?.content) {
+                  return data.choices[0].message.content;
+                }
+              }
+            }
+          } catch (e) {
+            lastError = e;
+          }
+
+          // 2. Hostinger / Apache PHP endpoint (/api/chat.php)
+          try {
+            const phpRes = await fetch('/api/chat.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: bodyStr
+            });
+            if (phpRes.ok) {
+              const text = await phpRes.text();
+              if (text && !text.trim().startsWith('<')) {
+                const data = JSON.parse(text);
+                if (data.choices && data.choices[0]?.message?.content) {
+                  return data.choices[0].message.content;
+                }
+              }
+            }
+          } catch (e) {
+            lastError = e;
+          }
+
+          // 3. Local Vite Dev Proxy / Serverless (/api/groq)
+          try {
+            const proxyRes = await fetch('/api/groq/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(groqApiKey ? { 'Authorization': `Bearer ${groqApiKey}` } : {})
+              },
+              body: bodyStr
+            });
+            if (proxyRes.ok) {
+              const text = await proxyRes.text();
+              if (text && !text.trim().startsWith('<')) {
+                const data = JSON.parse(text);
+                if (data.choices && data.choices[0]?.message?.content) {
+                  return data.choices[0].message.content;
+                }
+              }
+            }
+          } catch (e) {
+            lastError = e;
+          }
+        }
+
+        throw lastError || new Error('All AI service connections failed');
       };
 
-      let response = await sendChatRequest(groqModel);
+      const aiResponse = await fetchAIResponse(payloadMessages);
 
-      // If requested model was not found, fallback to available models
-      if (response.status === 404) {
-        response = await sendChatRequest('openai/gpt-oss-20b');
-      }
-
-      const rawText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(rawText);
-      } catch (e) {
-        throw new Error(`API returned non-JSON response. Status: ${response.status}.`);
-      }
-
-      if (data.choices && data.choices[0]) {
-        let aiResponse = data.choices[0].message.content;
-
+      if (aiResponse) {
         const cleanLines = aiResponse.split('\n').map(l => l.replace(/[*_#\-]/g, '').trim());
         let extractedName = null;
         let extractedPhone = null;
@@ -370,20 +387,16 @@ export default function ChatbotWidget() {
         }
 
         setMessages([...newMessages, { role: 'assistant', content: aiResponse }]);
-      } else {
-        const errorMsg = data.error ? data.error.message : "Unknown API error";
-        if (errorMsg.toLowerCase().includes('invalid api key') || response.status === 401) {
-          setMessages([...newMessages, { 
-            role: 'assistant', 
-            content: `⚠️ **Groq API Key Missing or Invalid**\n\nPlease add your Groq API key (\`gsk_...\`) to your \`.env\` file:\n\`\`\`env\nGROQ_API_KEY=gsk_your_key_here\n\`\`\`\nThen restart your dev server (\`npm run dev\`). You can get a free key at [console.groq.com/keys](https://console.groq.com/keys).` 
-          }]);
-        } else {
-          setMessages([...newMessages, { role: 'assistant', content: `I'm having trouble connecting to my brain. The API said: ${errorMsg}` }]);
-        }
       }
     } catch (error) {
       console.error("Chat error:", error);
-      setMessages([...newMessages, { role: 'assistant', content: `Sorry, something went wrong on my end. Error: ${error.message}` }]);
+      setMessages([
+        ...newMessages, 
+        { 
+          role: 'assistant', 
+          content: "Thank you for reaching out! 👋 I'm currently experiencing a momentary network delay. You can connect with our franchise consultant directly on WhatsApp at **+91 80725 57159** or fill in the franchise form above, and our team will get in touch immediately." 
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }

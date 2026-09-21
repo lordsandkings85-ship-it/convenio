@@ -18,6 +18,12 @@
 
   # Allow existing files, directories, and symlinks to be served directly
   RewriteRule ^index\.html$ - [L]
+
+  # Never rewrite /api/ requests or .php files to index.html
+  RewriteCond %{REQUEST_URI} ^/api/ [OR]
+  RewriteCond %{REQUEST_URI} \.php$
+  RewriteRule ^ - [L]
+
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
