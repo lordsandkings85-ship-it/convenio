@@ -1,86 +1,474 @@
 /* ==========================================================================
-   TemplatesPage.css - Dedicated Stylesheet for Standardized Messaging Templates
+   TemplatesPage.css - Premium Executive Template Manager & Editor
    ========================================================================== */
 
-.templates-page-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-}
-
+/* ── 1. Channel Selector Segmented Control ────────────────────────────────── */
 .templates-channel-tabs {
-  display: flex;
+  display: inline-flex;
+  align-items: center;
   background: #f1f5f9;
-  padding: 4px;
-  border-radius: 14px;
+  padding: 5px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
-  gap: 4px;
-  width: fit-content;
+  gap: 6px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .templates-channel-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 18px;
-  border-radius: 10px;
+  padding: 9px 20px;
+  border-radius: 12px;
   font-size: 13px;
-  font-weight: 800;
-  border: none;
+  font-weight: 700;
+  border: 1px solid transparent;
   background: transparent;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.templates-channel-btn:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .templates-channel-btn.is-active {
   background: #ffffff;
-  color: #0b1120;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+  font-weight: 800;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
-.templates-cards-grid {
+.templates-badge-count {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+}
+
+.templates-channel-btn.is-active .templates-badge-count.email {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.templates-channel-btn.is-active .templates-badge-count.whatsapp {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.templates-channel-btn:not(.is-active) .templates-badge-count {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+/* ── 2. Template Cards Grid & Layout ──────────────────────────────────────── */
+.templates-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .templates-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .template-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 18px 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.template-card:hover {
-  transform: translateY(-2px);
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  transition: all 0.25s ease;
 }
 
+.template-card:hover {
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.09), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+}
+
+.template-card.email:hover::before {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.template-card.whatsapp:hover::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+/* ── 3. Template Card Header & Badges ─────────────────────────────────────── */
+.template-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.template-card-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.template-trigger-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-style: solid;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.template-action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  shrink: 0;
+}
+
+.template-action-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.template-action-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  transform: scale(1.04);
+}
+
+.template-action-btn.delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+/* ── 4. Template Body Preview & Highlighted Variable Tokens ──────────────── */
+.template-preview-box {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+  min-height: 96px;
+  max-height: 136px;
+  overflow: hidden;
+  position: relative;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.template-preview-box::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(180deg, transparent, #f8fafc);
+  pointer-events: none;
+}
+
+.template-token-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  padding: 1px 5px;
+  margin: 0 2px;
+  vertical-align: baseline;
+  user-select: all;
+}
+
+/* ── 5. Template Card Footer ─────────────────────────────────────────────── */
+.template-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.template-attachment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.template-attachment-badge:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  text-decoration: underline;
+}
+
+.template-text-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.template-channel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.template-channel-pill.email {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.template-channel-pill.whatsapp {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+/* ── 6. Template Editor Modal / Card ─────────────────────────────────────── */
+.template-editor-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  animation: adminScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.template-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 16px;
+}
+
+.template-editor-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.template-editor-subtext {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Dynamic Variable Insertion Bar */
+.template-vars-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.template-var-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 5px 11px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.template-var-btn:hover {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.15);
+}
+
+.template-var-btn:active {
+  transform: translateY(0);
+}
+
+/* React Quill Custom Theme */
 .admin-quill-wrapper {
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  border: 1px solid #cbd5e1;
   overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.admin-quill-wrapper .ql-toolbar {
+.admin-quill-wrapper:focus-within {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.admin-quill-wrapper .ql-toolbar.ql-snow {
   border: none !important;
   border-bottom: 1px solid #e2e8f0 !important;
   background: #f8fafc;
+  padding: 10px 14px;
 }
 
-.admin-quill-wrapper .ql-container {
+.admin-quill-wrapper .ql-container.ql-snow {
   border: none !important;
-  min-height: 160px;
+  min-height: 180px;
   font-family: inherit;
   font-size: 14px;
+  line-height: 1.65;
+  color: #1e293b;
+}
+
+.admin-quill-wrapper .ql-editor {
+  padding: 14px 18px;
+  min-height: 180px;
+}
+
+.admin-quill-wrapper .ql-editor.ql-blank::before {
+  color: #94a3b8;
+  font-style: normal;
+  left: 18px;
+}
+
+/* WhatsApp Textarea */
+.template-whatsapp-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 14px 18px;
+  outline: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #1e293b;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  min-height: 180px;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.template-whatsapp-textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* Form Inputs & Selects */
+.template-form-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 11px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.template-form-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.template-form-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
