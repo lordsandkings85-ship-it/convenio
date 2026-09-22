@@ -224,7 +224,7 @@ export default function BlogPostsPage() {
           ) : posts.length > 0 ? (
             <div className="blog-posts-grid">
               {posts.map(post => (
-                <div key={post.id} className="blog-post-card group">
+                <div key={post.id} className="blog-post-card">
                   {/* Cover Image */}
                   <div className="blog-card-cover">
                     {post.cover_image ? (
@@ -235,9 +235,9 @@ export default function BlogPostsPage() {
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-slate-400">
-                        <Newspaper className="h-10 w-10 opacity-30 mb-1" />
-                        <span className="text-[11px] font-bold text-slate-400">No cover image</span>
+                      <div className="blog-card-placeholder">
+                        <Newspaper className="h-10 w-10 opacity-30" />
+                        <span>No cover image</span>
                       </div>
                     )}
                     
@@ -245,49 +245,53 @@ export default function BlogPostsPage() {
                     <span
                       className={`blog-status-badge ${post.status === 'PUBLISHED' ? 'published' : 'draft'}`}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                      <span className="blog-status-badge-dot"></span>
                       {post.status === 'PUBLISHED' ? 'Published' : 'Draft'}
                     </span>
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex justify-between items-start gap-2 mb-2">
-                      <h3 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-emerald-700 transition-colors">
+                  <div className="blog-card-body">
+                    <div className="blog-card-header">
+                      <h3 className="blog-card-title" title={post.title}>
                         {post.title}
                       </h3>
-                      <div className="flex items-center gap-1 shrink-0">
+                      <div className="blog-card-actions">
                         <button 
                           onClick={() => startEdit(post)} 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer" 
+                          className="blog-card-action-btn edit" 
                           title="Edit Post"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          <Edit3 size={15} />
                         </button>
                         <button 
                           onClick={() => handleDelete(post.id)} 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" 
+                          className="blog-card-action-btn delete" 
                           title="Delete Post"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
 
-                    {post.excerpt && (
-                      <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2 flex-1">
+                    {post.excerpt ? (
+                      <p className="blog-card-excerpt">
                         {post.excerpt}
+                      </p>
+                    ) : (
+                      <p className="blog-card-excerpt is-empty">
+                        No excerpt provided.
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-[11.5px] font-semibold text-slate-400 mt-auto pt-3.5 border-t border-slate-100">
-                      <span className="flex items-center gap-1.5 truncate max-w-[140px]">
-                        <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{post.author || 'Editorial Team'}</span>
+                    <div className="blog-card-footer">
+                      <span className="blog-card-author" title={post.author || 'Editorial Team'}>
+                        <User size={13} className="blog-card-icon" />
+                        <span>{post.author || 'Editorial Team'}</span>
                       </span>
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                        {formatDate(post.created_at)}
+                      <span className="blog-card-date">
+                        <Calendar size={13} className="blog-card-icon" />
+                        <span>{formatDate(post.created_at)}</span>
                       </span>
                     </div>
                   </div>

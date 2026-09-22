@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS public.blog_posts (
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 
--- Create Policies for Public Access
+-- Create Policies for Public Access (idempotent: drop before re-create so this file
+-- can be re-run safely)
+DROP POLICY IF EXISTS "Allow public full access on blog posts" ON public.blog_posts;
 CREATE POLICY "Allow public full access on blog posts" ON public.blog_posts FOR ALL TO public USING (true);
 
 -- Trigger for blog_posts updated_at
@@ -47,9 +49,20 @@ VALUES ('blog-images', 'blog-images', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Allow public read access to blog images
+DROP POLICY IF EXISTS "Public read access to blog images" ON storage.objects;
 CREATE POLICY "Public read access to blog images" ON storage.objects
     FOR SELECT TO public USING (bucket_id = 'blog-images');
 
--- Allow authenticated uploads of blog images (add the app's service role / anon upload policy as needed)
+-- Allow uploads from the anon key (used by the CMS) by granting the same
+-- public access that the app already uses for the blog_posts table.
+DROP POLICY IF EXISTS "Public upload access to blog images" ON storage.objects;
 CREATE POLICY "Public upload access to blog images" ON storage.objects
-    FOR INSERT TO authenticated WITH CHECK (bucket_id = 'blog-images');
+    FOR INSERT TO public WITH CHECK (bucket_id = 'blog-images');
+
+DROP POLICY IF EXISTS "Public update access to blog images" ON storage.objects;
+CREATE POLICY "Public update access to blog images" ON storage.objects
+    FOR UPDATE TO public USING (bucket_id = 'blog-images');
+
+DROP POLICY IF EXISTS "Public delete access to blog images" ON storage.objects;
+CREATE POLICY "Public delete access to blog images" ON storage.objects
+    FOR DELETE TO public USING (bucket_id = 'blog-images');
