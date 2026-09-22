@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { Newspaper, User, ArrowRight } from 'lucide-react';
+import { Newspaper, User, Calendar, ArrowRight } from 'lucide-react';
 import { getBlogPosts } from '../lib/api';
 import './Blog.css';
 
 const formatDate = (iso) => {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 const Blog = () => {
@@ -71,9 +71,15 @@ const Blog = () => {
                   <h2 className="blog-card-title">{post.title}</h2>
                   {post.excerpt && <p className="blog-card-excerpt">{post.excerpt}</p>}
                   <div className="blog-card-meta">
-                    <span>{post.author ? <><User size={14} /> {post.author}</> : <span>Convenio Mart</span>}</span>
-                    <span className="blog-card-date">{formatDate(post.created_at)}</span>
-                    <span className="blog-card-read">Read <ArrowRight size={14} /></span>
+                    <span className="blog-card-author">
+                      <User size={13} /> {post.author || 'Convenio Mart'}
+                    </span>
+                    <span className="blog-card-date">
+                      <Calendar size={13} /> {formatDate(post.created_at)}
+                    </span>
+                    <span className="blog-card-read">
+                      Read <ArrowRight size={13} />
+                    </span>
                   </div>
                 </div>
               </Link>
