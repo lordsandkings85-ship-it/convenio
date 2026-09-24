@@ -17,6 +17,14 @@ const formatDate = (iso) => {
 const looksLikeHtml = (content = '') =>
   /<(p|div|h[1-6]|ul|ol|li|table|blockquote|pre|strong|em|span)\b/gi.test(content || '');
 
+const normalizeContent = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\u00A0/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+};
+
 const BlogPost = () => {
   const { slug } = useParams();
   const [result, setResult] = useState({ slug: null, post: null, notFound: false });
@@ -102,7 +110,7 @@ const BlogPost = () => {
               <span><Calendar size={15} /> {formatDate(post.created_at)}</span>
               <span><Tag size={15} /> Blog</span>
             </div>
-            {post.excerpt && <p className="blog-post-excerpt">{post.excerpt}</p>}
+            {post.excerpt && <p className="blog-post-excerpt">{normalizeContent(post.excerpt)}</p>}
           </header>
 
           {post.cover_image && (
@@ -113,11 +121,11 @@ const BlogPost = () => {
 
           <div className="blog-post-content ql-container ql-snow">
             {looksLikeHtml(post.content) ? (
-              <div className="ql-editor" dangerouslySetInnerHTML={{ __html: post.content }} />
+              <div className="ql-editor" dangerouslySetInnerHTML={{ __html: normalizeContent(post.content) }} />
             ) : (
               <div className="ql-editor">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                  {post.content}
+                  {normalizeContent(post.content)}
                 </ReactMarkdown>
               </div>
             )}

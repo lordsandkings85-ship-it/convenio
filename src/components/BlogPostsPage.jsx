@@ -59,6 +59,14 @@ const emptyPost = {
 const looksLikeHtml = (content = '') =>
   /<(p|div|h[1-6]|ul|ol|li|table|blockquote|pre|strong|em|span)\b/gi.test(content || '');
 
+export const normalizeContent = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\u00A0/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+};
+
 export default function BlogPostsPage() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,8 +139,15 @@ export default function BlogPostsPage() {
       showToast('Please fill in a valid slug', 'error');
       return;
     }
+    const cleanPost = {
+      ...editingPost,
+      title: normalizeContent(editingPost.title).trim(),
+      slug: slugify(editingPost.slug),
+      excerpt: normalizeContent(editingPost.excerpt || '').trim(),
+      content: normalizeContent(editingPost.content || '')
+    };
     try {
-      await saveBlogPost(editingPost);
+      await saveBlogPost(cleanPost);
       await loadPosts();
       setIsEditing(false);
       setEditingPost(null);
@@ -161,9 +176,15 @@ export default function BlogPostsPage() {
   };
 
   const startEdit = (post) => {
-    setEditingPost(post ? { ...post } : { ...emptyPost, slug: '' });
+    const p = post ? {
+      ...post,
+      title: normalizeContent(post.title || ''),
+      excerpt: normalizeContent(post.excerpt || ''),
+      content: normalizeContent(post.content || '')
+    } : { ...emptyPost, slug: '' };
+    setEditingPost(p);
     setShowPreview(false);
-    setEditorMode(looksLikeHtml(post?.content) ? 'rich' : 'markdown');
+    setEditorMode(looksLikeHtml(p.content) ? 'rich' : 'markdown');
     setIsEditing(true);
   };
 
@@ -674,11 +695,14 @@ export default function BlogPostsPage() {
                   {editingPost.content ? (
                     <div className="ql-container ql-snow">
                       {looksLikeHtml(editingPost.content) ? (
-                        <div className="ql-editor blog-preview-body" dangerouslySetInnerHTML={{ __html: editingPost.content }} />
+                        <div
+                          className="ql-editor blog-preview-body"
+                          dangerouslySetInnerHTML={{ __html: normalizeContent(editingPost.content) }}
+                        />
                       ) : (
                         <div className="ql-editor blog-preview-body">
                           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                            {editingPost.content}
+                            {normalizeContent(editingPost.content)}
                           </ReactMarkdown>
                         </div>
                       )}

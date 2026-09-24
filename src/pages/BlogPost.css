@@ -361,7 +361,7 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
-  word-break: break-all;
+  word-break: normal;
   overflow-wrap: anywhere;
   transition: color 0.2s ease;
 }

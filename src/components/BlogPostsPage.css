@@ -459,21 +459,118 @@
   line-height: 1.75;
   color: #1e293b;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .blog-preview-container .ql-container.ql-snow {
-  border: none;
-  font-family: inherit;
-  height: auto;
+  border: none !important;
+  font-family: inherit !important;
+  height: auto !important;
 }
 
-.blog-preview-container .ql-snow .ql-editor {
-  padding: 0;
-  font-size: 15px;
-  line-height: 1.75;
-  height: auto;
-  overflow-y: visible;
-  font-family: inherit;
+.blog-preview-container .ql-snow .ql-editor,
+.blog-preview-container .ql-editor {
+  padding: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.75 !important;
+  height: auto !important;
+  overflow-y: visible !important;
+  font-family: inherit !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  text-align: left;
+}
+
+.blog-preview-container .ql-editor p {
+  margin-bottom: 1.15rem !important;
+  line-height: 1.75 !important;
+  color: #334155 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+.blog-preview-container .ql-editor h1 {
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 1.85rem 0 0.85rem !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+.blog-preview-container .ql-editor h2 {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 1.65rem 0 0.75rem !important;
+  line-height: 1.35 !important;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+.blog-preview-container .ql-editor h3 {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 1.4rem 0 0.6rem !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+.blog-preview-container .ql-editor pre {
+  white-space: pre !important;
+}
+
+.blog-preview-container .ql-editor strong,
+.blog-preview-container .ql-editor b {
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+
+.blog-preview-container .ql-editor a {
+  color: #e01a22 !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  transition: color 0.2s ease !important;
+}
+
+.blog-preview-container .ql-editor a:hover {
+  color: #c1151c !important;
+}
+
+.blog-preview-container .ql-editor blockquote {
+  border-left: 4px solid #e01a22 !important;
+  background: #fef2f2 !important;
+  margin: 1.5rem 0 !important;
+  padding: 1rem 1.4rem !important;
+  border-radius: 0 12px 12px 0 !important;
+  color: #475569 !important;
+  font-style: italic !important;
+  line-height: 1.7 !important;
+}
+
+.blog-preview-container .ql-editor ul,
+.blog-preview-container .ql-editor ol {
+  margin: 1rem 0 1.25rem !important;
+  padding-left: 1.5rem !important;
+}
+
+.blog-preview-container .ql-editor li {
+  margin-bottom: 0.5rem !important;
+  line-height: 1.7 !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
 }
 
 /* Quill alignment classes (center, right, justify, left) */
