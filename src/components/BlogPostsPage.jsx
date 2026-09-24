@@ -1,6 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './BlogPostsPage.css';
-import { Plus, Save, Trash2, Edit3, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2, Link2, Code, FileCheck, UploadCloud, ImagePlus } from 'lucide-react';
+import ReactQuill, { Quill as QuillStatic } from 'react-quill-new';
+import QuillTable from 'quill/modules/table';
+import QuillTableEmbed from 'quill/modules/tableEmbed';
+import 'react-quill-new/dist/quill.snow.css';
+
+QuillStatic.register({
+  'modules/table': QuillTable,
+  'modules/tableEmbed': QuillTableEmbed
+}, true);
+import { Plus, Save, Trash2, Edit3, X, Eye, Calendar, User, Image as ImageIcon, Newspaper, Sparkles, FileText, CheckCircle2, Link2, Code, FileCheck, UploadCloud, ImagePlus, Table, PenLine, AlignLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -22,6 +31,21 @@ const formatDate = (iso) => {
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
+const escapeCell = (cell) => (cell || '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+
+const tsvToMarkdownTable = (text) => {
+  const lines = text.trim().split(/\r?\n/).filter((l) => l.trim() !== '');
+  if (lines.length === 0) return '';
+  const rows = lines.map((l) => l.split('\t').map((c) => c.trim()));
+  const colCount = Math.max(...rows.map((r) => r.length));
+  const cells = (r) => r.concat(new Array(colCount - r.length).fill(''));
+  const fmt = (r) => `| ${cells(r).map(escapeCell).join(' | ')} |`;
+  const header = fmt(rows[0]);
+  const separator = `|${cells(rows[0]).map(() => ' --- ').join('|')}|`;
+  const body = rows.slice(1).map(fmt);
+  return [header, separator, ...body].join('\n');
+};
+
 const emptyPost = {
   title: '',
   slug: '',
@@ -32,6 +56,9 @@ const emptyPost = {
   status: 'DRAFT'
 };
 
+const looksLikeHtml = (content = '') =>
+  /<(p|div|h[1-6]|ul|ol|li|table|blockquote|pre|strong|em|span)\b/gi.test(content || '');
+
 export default function BlogPostsPage() {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,10 +67,38 @@ export default function BlogPostsPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [isContentUploading, setIsContentUploading] = useState(false);
+  const [editorMode, setEditorMode] = useState('rich'); // 'rich' | 'markdown'
   const coverInputRef = useRef(null);
   const contentInputRef = useRef(null);
   const markdownRef = useRef(null);
+  const quillRef = useRef(null);
   const { showToast, showConfirm } = useDialog();
+
+  const quillModules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ align: [] }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        ['table'],
+        ['clean']
+      ],
+      handlers: {
+        image: () => contentInputRef.current?.click(),
+        table: function () {
+          const table = this.quill.getModule('table');
+          if (table) table.insertTable(3, 3);
+        }
+      }
+    }
+  }), []);
+
+  const quillFormats = ['header', 'size', 'bold', 'italic', 'underline', 'strike', 'color', 'background', 'list', 'align', 'blockquote', 'code-block', 'link', 'image', 'table'];
 
   const loadPosts = async () => {
     try {
@@ -108,6 +163,7 @@ export default function BlogPostsPage() {
   const startEdit = (post) => {
     setEditingPost(post ? { ...post } : { ...emptyPost, slug: '' });
     setShowPreview(false);
+    setEditorMode(looksLikeHtml(post?.content) ? 'rich' : 'markdown');
     setIsEditing(true);
   };
 
@@ -134,19 +190,27 @@ export default function BlogPostsPage() {
     setIsContentUploading(true);
     try {
       const url = await uploadBlogImage(file);
-      const alt = file.name.replace(/\.[^.]+$/, '') || 'blog-image';
-      const snippet = `\n\n![${alt}](${url})\n`;
-      const el = markdownRef.current;
-      const current = editingPost.content || '';
-      let next;
-      if (el) {
-        const start = el.selectionStart ?? current.length;
-        const end = el.selectionEnd ?? current.length;
-        next = current.slice(0, start) + snippet + current.slice(end);
+      if (editorMode === 'rich' && quillRef.current) {
+        const quill = quillRef.current.getEditor();
+        const range = quill.getSelection() || { index: quill.getLength() - 1, length: 0 };
+        quill.insertEmbed(range.index, 'image', url);
+        quill.setSelection(range.index + 1, 0);
+        setEditingPost({ ...editingPost, content: quill.root.innerHTML });
       } else {
-        next = current.endsWith('\n') ? current + snippet.trimStart() : current + snippet;
+        const alt = file.name.replace(/\.[^.]+$/, '') || 'blog-image';
+        const snippet = `\n\n![${alt}](${url})\n`;
+        const el = markdownRef.current;
+        const current = editingPost.content || '';
+        let next;
+        if (el) {
+          const start = el.selectionStart ?? current.length;
+          const end = el.selectionEnd ?? current.length;
+          next = current.slice(0, start) + snippet + current.slice(end);
+        } else {
+          next = current.endsWith('\n') ? current + snippet.trimStart() : current + snippet;
+        }
+        setEditingPost({ ...editingPost, content: next });
       }
-      setEditingPost({ ...editingPost, content: next });
       showToast('Image uploaded and inserted into article', 'success');
     } catch (err) {
       console.error(err);
@@ -155,6 +219,37 @@ export default function BlogPostsPage() {
       setIsContentUploading(false);
       e.target.value = '';
     }
+  };
+
+  const insertAtCursor = (snippet) => {
+    const el = markdownRef.current;
+    const current = editingPost.content || '';
+    if (el) {
+      const start = el.selectionStart ?? current.length;
+      const end = el.selectionEnd ?? current.length;
+      return current.slice(0, start) + snippet + current.slice(end);
+    }
+    return current.endsWith('\n') ? current + snippet.trimStart() : current + snippet;
+  };
+
+  const handleMarkdownPaste = (e) => {
+    const text = e.clipboardData.getData('text/plain');
+    if (!text || !text.includes('\t')) return;
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return;
+    e.preventDefault();
+    const table = tsvToMarkdownTable(text);
+    if (!table) return;
+    const snippet = `\n\n${table}\n\n`;
+    const next = insertAtCursor(snippet);
+    setEditingPost({ ...editingPost, content: next });
+    showToast('Table detected on paste — converted to markdown table', 'success');
+  };
+
+  const handleInsertTable = () => {
+    const snippet = '\n\n| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n|  |  |  |\n\n';
+    setEditingPost({ ...editingPost, content: insertAtCursor(snippet) });
+    showToast('Markdown table template inserted', 'success');
   };
 
   const publishedCount = posts.filter(p => p.status === 'PUBLISHED').length;
@@ -337,6 +432,50 @@ export default function BlogPostsPage() {
           </div>
 
           <form onSubmit={handleSavePost} className="flex flex-col gap-6">
+            {/* Prominent Publish Bar */}
+            <div className={`blog-publish-bar ${editingPost.status === 'PUBLISHED' ? 'is-published' : ''}`}>
+              <div className="blog-publish-status">
+                <span className={`blog-publish-indicator ${editingPost.status === 'PUBLISHED' ? 'published' : 'draft'}`}></span>
+                <div>
+                  <p className="blog-publish-title">
+                    {editingPost.status === 'PUBLISHED' ? 'Article is LIVE on the website' : 'Article is a private Draft'}
+                  </p>
+                  <p className="blog-publish-sub">
+                    {editingPost.status === 'PUBLISHED'
+                      ? 'Anyone can view this article on /blog right now.'
+                      : 'Only you can see this. Toggle to Publish and it will appear on /blog.'}
+                  </p>
+                </div>
+              </div>
+              <div className="blog-publish-actions">
+                <div
+                  className="blog-toggle-wrapper"
+                  onClick={() => setEditingPost({ ...editingPost, status: editingPost.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED' })}
+                >
+                  <div
+                    className={`blog-toggle-track ${editingPost.status === 'PUBLISHED' ? 'is-published' : ''}`}
+                    role="switch"
+                    aria-checked={editingPost.status === 'PUBLISHED'}
+                  >
+                    <div className="blog-toggle-thumb" />
+                  </div>
+                  <span className="blog-toggle-label">
+                    {editingPost.status === 'PUBLISHED' ? 'Published' : 'Draft'}
+                  </span>
+                </div>
+                <button
+                  type="submit"
+                  className="admin-btn-primary inline-flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {editingPost.status === 'PUBLISHED' ? (
+                    <><CheckCircle2 className="h-4 w-4" /> Save & Publish</>
+                  ) : (
+                    <><Save className="h-4 w-4" /> Save as Draft</>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="blog-form-label">
                 <span>Article Headline / Title</span>
@@ -454,15 +593,53 @@ export default function BlogPostsPage() {
             <div>
               <div className="blog-markdown-toolbar">
                 <div className="blog-markdown-hints">
-                  <span className="text-[11.5px] font-bold text-slate-600 mr-1 flex items-center gap-1">
-                    <Code className="w-3.5 h-3.5 text-primary" /> Markdown Formatting:
+                  <span className="blog-editor-mode-seg">
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode('rich')}
+                      className={editorMode === 'rich' ? 'is-active' : ''}
+                      title="Rich text editor with formatting toolbar"
+                    >
+                      <PenLine className="w-3.5 h-3.5" /> Rich Text
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode('markdown')}
+                      className={editorMode === 'markdown' ? 'is-active' : ''}
+                      title="Plain markdown editor (supports tables)"
+                    >
+                      <AlignLeft className="w-3.5 h-3.5" /> Markdown
+                    </button>
                   </span>
-                  <span className="blog-markdown-pill">## H2</span>
-                  <span className="blog-markdown-pill">### H3</span>
-                  <span className="blog-markdown-pill">**bold**</span>
-                  <span className="blog-markdown-pill">*italic*</span>
-                  <span className="blog-markdown-pill">- list</span>
+                  {editorMode === 'markdown' && (
+                    <span className="text-[11.5px] font-bold text-slate-600 mr-1 flex items-center gap-1">
+                      <Code className="w-3.5 h-3.5 text-primary" /> Markdown Formatting:
+                    </span>
+                  )}
+                  {editorMode === 'markdown' && (
+                    <>
+                      <span className="blog-markdown-pill">## H2</span>
+                      <span className="blog-markdown-pill">### H3</span>
+                      <span className="blog-markdown-pill">**bold**</span>
+                      <span className="blog-markdown-pill">*italic*</span>
+                      <span className="blog-markdown-pill">- list</span>
+                      <span className="blog-markdown-pill">| table |</span>
+                      <span className="blog-markdown-pill">Paste from Excel auto-converts</span>
+                    </>
+                  )}
                 </div>
+
+                {editorMode === 'markdown' && (
+                  <button
+                    type="button"
+                    onClick={handleInsertTable}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0"
+                    title="Insert a markdown table"
+                  >
+                    <Table className="h-3.5 w-3.5" />
+                    Table
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -488,25 +665,46 @@ export default function BlogPostsPage() {
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer shrink-0"
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  {showPreview ? 'Switch to Markdown Editor' : 'Live Preview'}
+                  {showPreview ? 'Back to Editor' : 'Live Preview'}
                 </button>
               </div>
 
               {showPreview ? (
-                <div className="blog-preview-container prose max-w-none">
+                <div className="blog-preview-container">
                   {editingPost.content ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                      {editingPost.content}
-                    </ReactMarkdown>
+                    <div className="ql-container ql-snow">
+                      {looksLikeHtml(editingPost.content) ? (
+                        <div className="ql-editor blog-preview-body" dangerouslySetInnerHTML={{ __html: editingPost.content }} />
+                      ) : (
+                        <div className="ql-editor blog-preview-body">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                            {editingPost.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <p className="text-slate-400 italic">No content written yet. Switch back to markdown editor to compose.</p>
+                    <p className="text-slate-400 italic p-6 text-center">No content written yet. Go back to the editor to compose.</p>
                   )}
+                </div>
+              ) : editorMode === 'rich' ? (
+                <div className="admin-quill-wrapper blog-quill-wrapper">
+                  <ReactQuill
+                    ref={quillRef}
+                    theme="snow"
+                    modules={quillModules}
+                    formats={quillFormats}
+                    value={editingPost.content}
+                    onChange={(content) => setEditingPost({ ...editingPost, content })}
+                    placeholder="Start writing your article here... Use the toolbar for headings, bullet lists, font sizes, and images."
+                  />
                 </div>
               ) : (
                 <textarea
                   ref={markdownRef}
                   required
                   rows={12}
+                  onPaste={handleMarkdownPaste}
                   placeholder={'## Introduction\n\nConvenio Mart offers an exceptional franchise opportunity...\n\n### Key Benefits\n- High ROI & 70% profit share\n- Complete supply chain & POS support\n- Captive customer base in gated apartments'}
                   value={editingPost.content}
                   onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}

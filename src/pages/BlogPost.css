@@ -146,7 +146,6 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 24px;
-  padding: 3rem 3.5rem;
   box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.05);
   line-height: 1.85;
   color: #334155;
@@ -156,6 +155,128 @@
   overflow-wrap: break-word;
   hyphens: none;
   -webkit-hyphens: none;
+  overflow: hidden;
+}
+
+.blog-post-content.ql-container {
+  font-family: inherit;
+  border: 1px solid #e2e8f0;
+}
+
+.blog-post-content .ql-editor {
+  padding: 3rem 3.5rem;
+  height: auto;
+  overflow-y: visible;
+  font-family: inherit;
+  font-size: 1.06rem;
+  line-height: 1.85;
+  color: #334155;
+}
+
+/* Quill alignment classes (center, right, justify, left) */
+.blog-post-content .ql-align-center,
+.blog-post-content .ql-editor .ql-align-center,
+.blog-post-content p.ql-align-center,
+.blog-post-content h1.ql-align-center,
+.blog-post-content h2.ql-align-center,
+.blog-post-content h3.ql-align-center,
+.blog-post-content h4.ql-align-center,
+.blog-post-content blockquote.ql-align-center,
+.blog-post-content li.ql-align-center {
+  text-align: center !important;
+}
+
+.blog-post-content .ql-align-right,
+.blog-post-content .ql-editor .ql-align-right,
+.blog-post-content p.ql-align-right,
+.blog-post-content h1.ql-align-right,
+.blog-post-content h2.ql-align-right,
+.blog-post-content h3.ql-align-right,
+.blog-post-content h4.ql-align-right,
+.blog-post-content blockquote.ql-align-right,
+.blog-post-content li.ql-align-right {
+  text-align: right !important;
+}
+
+.blog-post-content .ql-align-justify,
+.blog-post-content .ql-editor .ql-align-justify,
+.blog-post-content p.ql-align-justify,
+.blog-post-content h1.ql-align-justify,
+.blog-post-content h2.ql-align-justify,
+.blog-post-content h3.ql-align-justify,
+.blog-post-content h4.ql-align-justify,
+.blog-post-content blockquote.ql-align-justify,
+.blog-post-content li.ql-align-justify {
+  text-align: justify !important;
+}
+
+.blog-post-content .ql-align-left,
+.blog-post-content .ql-editor .ql-align-left,
+.blog-post-content p.ql-align-left,
+.blog-post-content h1.ql-align-left,
+.blog-post-content h2.ql-align-left,
+.blog-post-content h3.ql-align-left,
+.blog-post-content h4.ql-align-left {
+  text-align: left !important;
+}
+
+/* Image alignment handling in article content */
+.blog-post-content .ql-align-center img,
+.blog-post-content p.ql-align-center img,
+.blog-post-content .ql-editor .ql-align-center img {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+}
+
+.blog-post-content .ql-align-right img,
+.blog-post-content p.ql-align-right img,
+.blog-post-content .ql-editor .ql-align-right img {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  display: block !important;
+}
+
+.blog-post-content .ql-align-left img,
+.blog-post-content p.ql-align-left img,
+.blog-post-content .ql-editor .ql-align-left img {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  display: block !important;
+}
+
+/* Quill indentation formatting */
+.blog-post-content .ql-editor .ql-indent-1:not(.ql-direction-rtl),
+.blog-post-content .ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 3em !important;
+}
+
+.blog-post-content .ql-editor .ql-indent-2:not(.ql-direction-rtl),
+.blog-post-content .ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 6em !important;
+}
+
+.blog-post-content .ql-editor .ql-indent-3:not(.ql-direction-rtl),
+.blog-post-content .ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 9em !important;
+}
+
+.blog-post-content .ql-editor .ql-indent-4:not(.ql-direction-rtl),
+.blog-post-content .ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 12em !important;
+}
+
+/* Quill font sizes */
+.blog-post-content .ql-size-small {
+  font-size: 0.75em !important;
+}
+
+.blog-post-content .ql-size-large {
+  font-size: 1.5em !important;
+}
+
+.blog-post-content .ql-size-huge {
+  font-size: 2.25em !important;
 }
 
 .blog-post-content > *:first-child {

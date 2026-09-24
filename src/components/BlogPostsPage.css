@@ -455,55 +455,157 @@
   border-radius: 0 0 14px 14px;
   padding: 24px 28px;
   min-height: 280px;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.75;
   color: #1e293b;
   overflow-y: auto;
 }
 
-/* Quill rich text format classes (font size + alignment) in the preview */
+.blog-preview-container .ql-container.ql-snow {
+  border: none;
+  font-family: inherit;
+  height: auto;
+}
+
+.blog-preview-container .ql-snow .ql-editor {
+  padding: 0;
+  font-size: 15px;
+  line-height: 1.75;
+  height: auto;
+  overflow-y: visible;
+  font-family: inherit;
+}
+
+/* Quill alignment classes (center, right, justify, left) */
+.blog-preview-container .ql-align-center,
+.blog-preview-container .ql-editor .ql-align-center,
+.blog-preview-container p.ql-align-center,
+.blog-preview-container h1.ql-align-center,
+.blog-preview-container h2.ql-align-center,
+.blog-preview-container h3.ql-align-center,
+.blog-preview-container h4.ql-align-center,
+.blog-preview-container blockquote.ql-align-center,
+.blog-preview-container li.ql-align-center {
+  text-align: center !important;
+}
+
+.blog-preview-container .ql-align-right,
+.blog-preview-container .ql-editor .ql-align-right,
+.blog-preview-container p.ql-align-right,
+.blog-preview-container h1.ql-align-right,
+.blog-preview-container h2.ql-align-right,
+.blog-preview-container h3.ql-align-right,
+.blog-preview-container h4.ql-align-right,
+.blog-preview-container blockquote.ql-align-right,
+.blog-preview-container li.ql-align-right {
+  text-align: right !important;
+}
+
+.blog-preview-container .ql-align-justify,
+.blog-preview-container .ql-editor .ql-align-justify,
+.blog-preview-container p.ql-align-justify,
+.blog-preview-container h1.ql-align-justify,
+.blog-preview-container h2.ql-align-justify,
+.blog-preview-container h3.ql-align-justify,
+.blog-preview-container h4.ql-align-justify,
+.blog-preview-container blockquote.ql-align-justify,
+.blog-preview-container li.ql-align-justify {
+  text-align: justify !important;
+}
+
+.blog-preview-container .ql-align-left,
+.blog-preview-container .ql-editor .ql-align-left,
+.blog-preview-container p.ql-align-left,
+.blog-preview-container h1.ql-align-left,
+.blog-preview-container h2.ql-align-left,
+.blog-preview-container h3.ql-align-left,
+.blog-preview-container h4.ql-align-left {
+  text-align: left !important;
+}
+
+/* Image alignment handling in preview */
+.blog-preview-container .ql-align-center img,
+.blog-preview-container p.ql-align-center img,
+.blog-preview-container .ql-editor .ql-align-center img {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+}
+
+.blog-preview-container .ql-align-right img,
+.blog-preview-container p.ql-align-right img,
+.blog-preview-container .ql-editor .ql-align-right img {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  display: block !important;
+}
+
+.blog-preview-container .ql-align-left img,
+.blog-preview-container p.ql-align-left img,
+.blog-preview-container .ql-editor .ql-align-left img {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  display: block !important;
+}
+
+/* Quill indentation formatting in preview */
+.blog-preview-container .ql-editor .ql-indent-1:not(.ql-direction-rtl),
+.blog-preview-container .ql-indent-1:not(.ql-direction-rtl) {
+  padding-left: 3em !important;
+}
+
+.blog-preview-container .ql-editor .ql-indent-2:not(.ql-direction-rtl),
+.blog-preview-container .ql-indent-2:not(.ql-direction-rtl) {
+  padding-left: 6em !important;
+}
+
+.blog-preview-container .ql-editor .ql-indent-3:not(.ql-direction-rtl),
+.blog-preview-container .ql-indent-3:not(.ql-direction-rtl) {
+  padding-left: 9em !important;
+}
+
+.blog-preview-container .ql-editor .ql-indent-4:not(.ql-direction-rtl),
+.blog-preview-container .ql-indent-4:not(.ql-direction-rtl) {
+  padding-left: 12em !important;
+}
+
+/* Quill font sizes in preview */
 .blog-preview-container .ql-size-small {
-  font-size: 0.75em;
+  font-size: 0.75em !important;
 }
 
 .blog-preview-container .ql-size-large {
-  font-size: 1.5em;
+  font-size: 1.5em !important;
 }
 
 .blog-preview-container .ql-size-huge {
-  font-size: 2.5em;
+  font-size: 2.25em !important;
 }
 
-.blog-preview-container .ql-align-center {
-  text-align: center;
-}
-
-.blog-preview-container .ql-align-right {
-  text-align: right;
-}
-
-.blog-preview-container .ql-align-justify {
-  text-align: justify;
-}
-
+/* Table styles in preview */
 .blog-preview-container table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 14px 0;
-  font-size: 13.5px;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 16px 0 !important;
+  font-size: 14px;
 }
 
 .blog-preview-container th,
 .blog-preview-container td {
-  border: 1px solid #cbd5e1;
-  padding: 7px 12px;
+  border: 1px solid #cbd5e1 !important;
+  padding: 8px 12px !important;
   text-align: left;
+  vertical-align: top;
 }
 
 .blog-preview-container th {
-  background: #f8fafc;
-  font-weight: 800;
-  color: #0f172a;
+  background: #f8fafc !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+
+.blog-preview-container tr:nth-child(even) {
+  background: #fbfcfe;
 }
 
 /* Editor Mode Segmented Control */

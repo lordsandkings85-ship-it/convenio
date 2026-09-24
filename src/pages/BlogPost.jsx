@@ -6,12 +6,16 @@ import rehypeRaw from 'rehype-raw';
 import SEO from '../components/SEO';
 import { ArrowLeft, ArrowRight, Calendar, User, Tag } from 'lucide-react';
 import { getBlogPostBySlug } from '../lib/api';
+import 'react-quill-new/dist/quill.snow.css';
 import './BlogPost.css';
 
 const formatDate = (iso) => {
   if (!iso) return '';
   return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 };
+
+const looksLikeHtml = (content = '') =>
+  /<(p|div|h[1-6]|ul|ol|li|table|blockquote|pre|strong|em|span)\b/gi.test(content || '');
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -107,10 +111,16 @@ const BlogPost = () => {
             </div>
           )}
 
-          <div className="blog-post-content">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-              {post.content}
-            </ReactMarkdown>
+          <div className="blog-post-content ql-container ql-snow">
+            {looksLikeHtml(post.content) ? (
+              <div className="ql-editor" dangerouslySetInnerHTML={{ __html: post.content }} />
+            ) : (
+              <div className="ql-editor">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                  {post.content}
+                </ReactMarkdown>
+              </div>
+            )}
           </div>
 
           <div className="blog-post-footer">
