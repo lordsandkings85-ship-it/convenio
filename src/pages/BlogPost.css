@@ -320,7 +320,7 @@
 }
 
 .blog-post-content p {
-  margin-bottom: 1.4rem;
+  margin-bottom: 1.15rem;
   color: #334155;
   word-break: normal;
   overflow-wrap: break-word;
@@ -333,27 +333,94 @@
   color: #0f172a;
 }
 
-.blog-post-content ul,
+/* ── Article Content List Styling (Quill data-list & Standard ul/ol) ────── */
+.blog-post-content .ql-editor ol,
 .blog-post-content ol {
-  margin: 1.25rem 0 1.5rem;
-  padding-left: 1.6rem;
+  counter-reset: ql-article-counter !important;
+  margin: 0.85rem 0 1.15rem !important;
+  padding-left: 0 !important;
+  list-style: none !important;
 }
 
+.blog-post-content .ql-editor ul,
 .blog-post-content ul {
-  list-style: disc;
+  margin: 0.85rem 0 1.15rem !important;
+  padding-left: 1.75rem !important;
+  list-style-type: disc !important;
 }
 
-.blog-post-content ol {
-  list-style: decimal;
+.blog-post-content .ql-editor ul li,
+.blog-post-content ul li {
+  list-style-type: disc !important;
+  display: list-item !important;
+  margin-bottom: 0.45rem !important;
+  line-height: 1.75 !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
 }
 
-.blog-post-content li {
-  margin-bottom: 0.6rem;
-  line-height: 1.7;
-  word-break: normal;
-  overflow-wrap: break-word;
-  hyphens: none;
-  -webkit-hyphens: none;
+/* Quill Bullet List items (li[data-list="bullet"]) */
+.blog-post-content .ql-editor li[data-list="bullet"],
+.blog-post-content li[data-list="bullet"] {
+  position: relative !important;
+  padding-left: 1.6rem !important;
+  list-style-type: none !important;
+  display: block !important;
+  margin-bottom: 0.45rem !important;
+  line-height: 1.75 !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+.blog-post-content .ql-editor li[data-list="bullet"]::before,
+.blog-post-content li[data-list="bullet"]::before {
+  content: '\2022' !important;
+  position: absolute !important;
+  left: 0.35rem !important;
+  top: 0 !important;
+  font-size: 1.25em !important;
+  color: #0f172a !important;
+  line-height: 1.4 !important;
+}
+
+/* Quill Numbered List items (li[data-list="ordered"]) */
+.blog-post-content .ql-editor li[data-list="ordered"],
+.blog-post-content li[data-list="ordered"] {
+  counter-increment: ql-article-counter !important;
+  position: relative !important;
+  padding-left: 1.85rem !important;
+  list-style-type: none !important;
+  display: block !important;
+  margin-bottom: 0.45rem !important;
+  line-height: 1.75 !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+.blog-post-content .ql-editor li[data-list="ordered"]::before,
+.blog-post-content li[data-list="ordered"]::before {
+  content: counter(ql-article-counter) '. ' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  line-height: inherit !important;
+}
+
+/* Standard OL without data-list */
+.blog-post-content .ql-editor ol:not(:has(li[data-list])),
+.blog-post-content ol:not(:has(li[data-list])) {
+  padding-left: 1.75rem !important;
+  list-style-type: decimal !important;
+}
+
+.blog-post-content .ql-editor ol:not(:has(li[data-list])) li,
+.blog-post-content ol li:not([data-list]) {
+  list-style-type: decimal !important;
+  display: list-item !important;
+  margin-bottom: 0.45rem !important;
+  line-height: 1.75 !important;
 }
 
 .blog-post-content a {
